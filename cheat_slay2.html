@@ -164,7 +164,7 @@
             <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-8">
                 全20階層＋無限エンドレスモード搭載のインフレ闘技場。<br>
                 サイコロを<span class="text-yellow-400 font-bold">「全面6」</span>や<span class="text-cyan-400 font-bold">「×3倍率面」</span>に違法改造し、<br>
-                20種のカードと16種の遺物シナジーで<span class="text-rose-400 font-bold">兆・京超えの破壊火力</span>を叩き込め！
+                20種のカードと16種の遺物シナジーで<span class="text-rose-400 font-bold">無量大数・指数超えの破壊火力</span>を叩き込め！
             </p>
 
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
@@ -233,10 +233,10 @@
         <section class="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
             <!-- 敵ステータス＆ビジュアル -->
             <div id="enemy-panel" class="md:col-span-8 bg-gradient-to-br from-[#191628] to-[#110f1c] border-2 border-[#393456] rounded-3xl p-4 flex items-center justify-between gap-4 relative overflow-hidden shadow-xl">
-                <div class="flex-1 z-10">
+                <div class="flex-1 z-10 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap mb-1">
                         <span id="ui-enemy-tag" class="px-2.5 py-0.5 rounded-md bg-rose-950 border border-rose-500/40 text-rose-300 text-xs font-bold">ENEMY</span>
-                        <h2 id="ui-enemy-name" class="text-lg sm:text-2xl font-black text-white">チンピラ・ゴブリン</h2>
+                        <h2 id="ui-enemy-name" class="text-lg sm:text-2xl font-black text-white truncate">チンピラ・ゴブリン</h2>
                     </div>
 
                     <!-- 敵の行動予告（インテント） -->
@@ -265,7 +265,7 @@
             <!-- ターン倍率＆シナジーモニター -->
             <div class="md:col-span-4 bg-gradient-to-br from-[#1f192e] to-[#13101f] border-2 border-yellow-500/40 rounded-3xl p-4 flex flex-col justify-center items-center text-center shadow-xl relative overflow-hidden">
                 <span class="text-xs font-bold tracking-wider text-yellow-300/80 uppercase mb-1">CURRENT MULTIPLIER</span>
-                <div id="ui-turn-mult" class="text-3xl sm:text-4xl font-black text-yellow-400 neon-gold transition-transform duration-200">
+                <div id="ui-turn-mult" class="text-2xl sm:text-3xl font-black text-yellow-400 neon-gold transition-transform duration-200 break-all px-1">
                     ×1.0
                 </div>
                 <div id="ui-synergy-info" class="mt-2 text-xs text-cyan-300 font-semibold space-y-0.5">
@@ -394,22 +394,22 @@
             <h2 id="result-title" class="text-3xl sm:text-4xl font-black mb-2">GAME OVER</h2>
             <p id="result-desc" class="text-sm text-gray-300 mb-6">裏カジノの闇に飲まれた……</p>
 
-            <div class="bg-[#0d0c16] border border-[#2d2b47] rounded-2xl p-4 mb-6 space-y-2.5 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-gray-400">到達フロア</span>
-                    <span id="stat-floor" class="font-black text-white">Floor 1</span>
+            <div class="bg-[#0d0c16] border border-[#2d2b47] rounded-2xl p-4 mb-6 space-y-3 text-sm">
+                <div class="flex justify-between items-center gap-3">
+                    <span class="text-gray-400 shrink-0">到達フロア</span>
+                    <span id="stat-floor" class="font-black text-white text-right">Floor 1</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-400">最大単発ダメージ</span>
-                    <span id="stat-max-dmg" class="font-black text-yellow-400 text-base">0</span>
+                <div class="flex justify-between items-center gap-3">
+                    <span class="text-gray-400 shrink-0">最大単発ダメージ</span>
+                    <span id="stat-max-dmg" class="font-black text-yellow-400 text-base text-right break-all">0</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-400">獲得した遺物数</span>
-                    <span id="stat-artifacts" class="font-black text-purple-300">0 個</span>
+                <div class="flex justify-between items-center gap-3">
+                    <span class="text-gray-400 shrink-0">獲得した遺物数</span>
+                    <span id="stat-artifacts" class="font-black text-purple-300 text-right">0 個</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-400">最終所持ゴールド</span>
-                    <span id="stat-gold" class="font-black text-amber-300">0 G</span>
+                <div class="flex justify-between items-center gap-3">
+                    <span class="text-gray-400 shrink-0">最終所持ゴールド</span>
+                    <span id="stat-gold" class="font-black text-amber-300 text-right">0 G</span>
                 </div>
             </div>
 
@@ -442,7 +442,7 @@
                 </div>
                 <div class="p-3 rounded-xl bg-black/40 border border-gray-800">
                     <div class="font-bold text-purple-300 mb-1">3. ぶっ壊れシナジー例</div>
-                    『違法複製』や『鏡写しのトリック』でトレイを「6」だらけにし、『断罪の666』や『ゾロ目の悪魔』『無限機関の歯車』を重ねれば<span class="text-rose-400 font-bold">億・兆・京ダメージ</span>が現実になる！
+                    『違法複製』や『鏡写しのトリック』でトレイを「6」だらけにし、『断罪の666』や『ゾロ目の悪魔』『無限機関の歯車』を重ねれば<span class="text-rose-400 font-bold">無量大数・指数ダメージ</span>が現実になる！
                 </div>
             </div>
         </div>
@@ -746,7 +746,7 @@
             { floor: 9, name: '深淵の竜騎士', tag: 'FLOOR 9', maxHp: 2300, atk: 43, gold: 120, color: '#fb7185', shape: 'dragon' },
             { floor: 10, name: '【中ボス】運命の女神フォルトゥーナ', tag: 'MID BOSS 2', maxHp: 4800, atk: 48, gold: 180, color: '#ffd700', shape: 'boss1' },
 
-            // 11〜20層（ver 2.0 新規追加エリア）
+            // 11〜20層
             { floor: 11, name: '禁断のチップゴーレム', tag: 'FLOOR 11', maxHp: 7500, atk: 52, gold: 130, color: '#34d399', shape: 'golem' },
             { floor: 12, name: '白銀の暗殺者ミラージュ', tag: 'FLOOR 12', maxHp: 12000, atk: 56, gold: 140, color: '#e2e8f0', shape: 'assassin' },
             { floor: 13, name: '混沌のダイス・ヒドラ', tag: 'FLOOR 13', maxHp: 19500, atk: 60, gold: 155, color: '#818cf8', shape: 'hydra' },
@@ -763,7 +763,6 @@
             if (floorNum <= ENEMY_LIST.length) {
                 return { ...ENEMY_LIST[floorNum - 1] };
             }
-            // 21層以降（エンドレスモード）：指数関数インフレ
             const extra = floorNum - 20;
             const scaledHp = Math.floor(1500000 * Math.pow(2.1, extra));
             const scaledAtk = 100 + extra * 12;
@@ -846,7 +845,6 @@
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
 
-            // 20層クリア報酬も付与して報酬画面へ
             const healed = Math.min(gameState.maxHp - gameState.hp, 30);
             gameState.hp += healed;
             document.getElementById('reward-heal-msg').innerText = `♾️ エンドレス突入ボーナス！ HP +${healed} 回復！`;
@@ -897,7 +895,6 @@
 
             decideEnemyIntent();
 
-            // ダイス生成＆ロール
             gameState.dice = [];
             const baseCount = gameState.diceTemplates.length;
             for (let i = 0; i < baseCount; i++) {
@@ -912,7 +909,6 @@
                 }
             }
 
-            // 手札を5枚になるまでドロー
             while (gameState.hand.length < 5) {
                 if (!drawCard()) break;
             }
@@ -1017,13 +1013,11 @@
             if (!state || !state.dice) return 1.0;
             let mult = state.turnMult;
 
-            // ダイス自体の倍率面（×2, ×3など）
             if (die && die.current.type === 'mult') {
                 const faceFactor = hasArtifact('royal_scepter') ? Math.pow(die.current.val, 2) : die.current.val;
                 mult *= faceFactor;
             }
 
-            // ゾロ目の悪魔（トレイ内の重複出目ごとに ×2）
             if (hasArtifact('demon_doubles')) {
                 const counts = {};
                 let duplicatePairs = 0;
@@ -1037,23 +1031,19 @@
                 }
             }
 
-            // インフレの歯車（使用済みカード枚数ごとに ×1.5）
             if (hasArtifact('inflation_gear') && state.cardsPlayedThisTurn > 0) {
                 mult *= Math.pow(1.5, state.cardsPlayedThisTurn);
             }
 
-            // 破滅の天秤（HP50%以下で ×4）
             if (hasArtifact('scale_of_ruin') && state.hp <= state.maxHp * 0.5) {
                 mult *= 4;
             }
 
-            // 強欲の王冠（10Gごとに +15%）
             if (hasArtifact('crown_of_greed') && state.gold >= 10) {
                 const stacks = Math.floor(state.gold / 10);
                 mult *= (1 + stacks * 0.15);
             }
 
-            // 無限機関の歯車（ターン倍率10倍超えで ×3）
             if (hasArtifact('infinity_engine') && state.turnMult > 10) {
                 mult *= 3;
             }
@@ -1063,7 +1053,6 @@
 
         function calcAttackDamage(basePower, effVal, totalMult, state = gameState) {
             let dmg = basePower * totalMult;
-            // 黄金の鉛（出目6以上で攻撃時 ×2.5倍）
             if (hasArtifact('golden_lead') && effVal >= 6) {
                 dmg *= 2.5;
             }
@@ -1115,7 +1104,6 @@
 
             SoundFX.cardPlay();
 
-            // ダイス消費処理（違法複製は消費しない、幻影のプリズムは35%で非消費）
             if (card.req !== 'none' && selectedDie) {
                 if (cardId === 'dice_cloner') {
                     // クローンは消費しない
@@ -1127,12 +1115,10 @@
                 gameState.selectedDieIndex = null;
             }
 
-            // 手札から捨て札へ移動
             gameState.hand.splice(handIndex, 1);
             gameState.discardPile.push(cardId);
             gameState.cardsPlayedThisTurn++;
 
-            // ゴッドハンド（2回連続発動）チェック
             const castTimes = (gameState.doubleCastNext && cardId !== 'god_hand') ? 2 : 1;
             if (castTimes === 2) {
                 gameState.doubleCastNext = false;
@@ -1144,7 +1130,6 @@
                 executeSingleCardEffect(cardId, selectedDie);
             }
 
-            // 遺物パッシブ（カード使用後）
             if (hasArtifact('berserker_chip')) {
                 gameState.berserkerBonus += 2;
             }
@@ -1283,7 +1268,6 @@
                     dealDamageToEnemy(dmg);
                     break;
                 }
-                // --- ver 2.0 新規カード処理 ---
                 case 'exponential_dice': {
                     const factor = +(1 + effVal * 0.35).toFixed(2);
                     gameState.turnMult = +(gameState.turnMult * factor).toFixed(2);
@@ -1406,9 +1390,9 @@
 
             let color = '#ffffff';
             let size = 26;
-            if (isInsane) { color = '#ffd700'; size = 46; }
-            else if (rawDmg >= 1000) { color = '#ff2a55'; size = 38; }
-            else if (isHuge) { color = '#00f3ff'; size = 32; }
+            if (isInsane) { color = '#ffd700'; size = 42; }
+            else if (rawDmg >= 1000) { color = '#ff2a55'; size = 36; }
+            else if (isHuge) { color = '#00f3ff'; size = 30; }
 
             spawnFloatingText(`-${formatNum(rawDmg)}!`, x, y, color, size);
         }
@@ -1416,7 +1400,6 @@
         function endPlayerTurn() {
             if (!gameState.enemy || gameState.enemy.hp <= 0) return;
 
-            // 深淵の帳簿（未使用ダイス持ち越し）
             if (hasArtifact('abyssal_ledger')) {
                 const unusedCount = gameState.dice.filter(d => !d.used).length;
                 if (unusedCount > 0) {
@@ -1485,7 +1468,6 @@
             const goldReward = gameState.enemy.gold;
             gameState.gold += goldReward;
 
-            // 20層（初回ラスボス）撃破時はクリア＆エンドレス選択画面へ
             if (gameState.floor === 20 && !gameState.endless) {
                 showResultScreen(true);
                 return;
@@ -2032,26 +2014,52 @@
             return `<span class="px-1.5 py-0.5 rounded ${isHigh ? 'bg-yellow-950 border border-yellow-400 text-yellow-300' : 'bg-gray-800 text-gray-300'} text-xs font-bold">${f.val}</span>`;
         }
 
+        /* 日本語大数単位（無量大数 1e68 まで）＋ 指数表記対応フォーマット */
         function formatNum(num) {
-            if (num < 10000) return num.toLocaleString();
+            if (!Number.isFinite(num)) return '∞ (カンスト)';
+            if (num < 10000) return Math.floor(num).toLocaleString();
+
             const units = [
+                { val: 1e68, label: '無量大数' },
+                { val: 1e64, label: '不可思議' },
+                { val: 1e60, label: '那由他' },
+                { val: 1e56, label: '阿僧祇' },
+                { val: 1e52, label: '恒河沙' },
+                { val: 1e48, label: '極' },
+                { val: 1e44, label: '載' },
+                { val: 1e40, label: '正' },
+                { val: 1e36, label: '澗' },
+                { val: 1e32, label: '溝' },
+                { val: 1e28, label: '穣' },
+                { val: 1e24, label: '𥝱' },
+                { val: 1e20, label: '垓' },
                 { val: 1e16, label: '京' },
                 { val: 1e12, label: '兆' },
                 { val: 1e8,  label: '億' },
                 { val: 1e4,  label: '万' }
             ];
+
+            // 1e72（1万無量大数）以上はコンパクトな指数表記に切り替え
+            if (num >= 1e72) {
+                const expStr = num.toExponential(2);
+                const [mantissa, expPart] = expStr.split('e+');
+                return `${mantissa} × 10^${expPart}`;
+            }
+
             for (const u of units) {
                 if (num >= u.val) {
-                    const major = Math.floor(num / u.val);
-                    const minor = Math.floor((num % u.val) / (u.val / 10000));
-                    return minor > 0 ? `${major.toLocaleString()}${u.label}${minor}` : `${major.toLocaleString()}${u.label}`;
+                    const scaled = num / u.val;
+                    // 整数部が4桁なら小数なし、3桁以下なら小数2桁までスッキリ表示
+                    const formatted = scaled >= 1000 ? Math.floor(scaled).toLocaleString() : scaled.toFixed(2).replace(/\.00$/, '');
+                    return `${formatted}${u.label}`;
                 }
             }
             return num.toExponential(2);
         }
 
         function formatMult(m) {
-            if (m >= 10000) return formatNum(Math.floor(m));
+            if (!Number.isFinite(m)) return '∞';
+            if (m >= 10000) return formatNum(m);
             if (m >= 100) return Math.floor(m).toLocaleString();
             return Number.isInteger(m) ? m : m.toFixed(1);
         }
