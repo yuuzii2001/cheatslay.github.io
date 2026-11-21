@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHEAT & SLAY ver 2.1 〜イカサマ上等ダイスローグ〜</title>
+    <title>CHEAT & SLAY ver 2.2 〜イカサマ上等ダイスローグ〜</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter & Noto Sans JP -->
@@ -153,7 +153,7 @@
         <div class="max-w-xl w-full bg-[#13121e]/90 border-2 border-[#383556] rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-md">
             <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-purple-950/80 border border-purple-500/50 text-purple-300 text-xs sm:text-sm font-bold tracking-widest mb-4">
                 <span>UNDERGROUND DICE ROGUELIKE</span>
-                <span class="px-2 py-0.5 rounded bg-yellow-500 text-black font-black text-[10px]">VER 2.1</span>
+                <span class="px-2 py-0.5 rounded bg-yellow-500 text-black font-black text-[10px]">VER 2.2</span>
             </div>
             <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-rose-500 mb-2 drop-shadow-lg">
                 CHEAT &amp; SLAY
@@ -172,7 +172,7 @@
                     🎲 テーブルに着く（ゲーム開始）
                 </button>
                 <button onclick="toggleModal('rules-modal', true)" class="px-6 py-4 rounded-2xl bg-[#1f1d30] hover:bg-[#2a2842] border border-[#47436b] text-gray-200 font-bold text-base transition">
-                    📖 遊び方・調整ルール
+                    📖 遊び方・快適機能
                 </button>
             </div>
         </div>
@@ -206,9 +206,11 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <!-- デッキ確認ボタン -->
-                <button onclick="openDeckModal()" class="px-3 py-1.5 rounded-xl bg-[#211f36] hover:bg-[#2d2b4a] border border-[#44416b] text-xs sm:text-sm font-bold text-gray-200 transition">
+                <!-- デッキ・山札確認ボタン -->
+                <button onclick="openDeckModal('draw')" class="px-3 py-1.5 rounded-xl bg-[#211f36] hover:bg-[#2d2b4a] border border-[#44416b] text-xs sm:text-sm font-bold text-gray-200 transition">
                     🃏 山札 <span id="ui-deck-count" class="text-cyan-400">0</span>
+                    <span class="text-gray-500 mx-0.5">/</span>
+                    <span class="text-gray-400 text-xs">捨 <span id="ui-discard-count" class="text-gray-200">0</span></span>
                     <span class="text-[10px] text-gray-400 ml-1">(再補充:<span id="ui-reshuffle-left" class="text-amber-300">2</span>)</span>
                 </button>
                 <!-- サウンド切替 -->
@@ -224,7 +226,7 @@
 
         <!-- 所持アーティファクト（遺物）バー -->
         <div id="ui-artifacts-bar" class="bg-[#12111d]/90 border border-[#2c2a42] rounded-2xl px-3 py-2 flex items-center gap-2 overflow-x-auto min-h-[46px]">
-            <span class="text-xs font-bold text-gray-400 shrink-0">🏺 遺物 (<span id="ui-art-count">0</span>):</span>
+            <span class="text-xs font-bold text-gray-400 shrink-0">🏺 遺物 (<span id="ui-art-count" class="text-purple-300">0</span>/16):</span>
             <div id="ui-artifacts-list" class="flex items-center gap-2">
                 <span class="text-xs text-gray-500">なし（勝利報酬で獲得しよう）</span>
             </div>
@@ -264,13 +266,13 @@
             </div>
 
             <!-- ターン倍率＆シナジーモニター -->
-            <div class="md:col-span-4 bg-gradient-to-br from-[#1f192e] to-[#13101f] border-2 border-yellow-500/40 rounded-3xl p-4 flex flex-col justify-center items-center text-center shadow-xl relative overflow-hidden">
-                <span class="text-xs font-bold tracking-wider text-yellow-300/80 uppercase mb-1">CURRENT MULTIPLIER</span>
+            <div class="md:col-span-4 bg-gradient-to-br from-[#1f192e] to-[#13101f] border-2 border-yellow-500/40 rounded-3xl p-3.5 flex flex-col justify-center items-center text-center shadow-xl relative overflow-hidden">
+                <span class="text-[11px] font-bold tracking-wider text-yellow-300/80 uppercase mb-0.5">TOTAL MULTIPLIER</span>
                 <div id="ui-turn-mult" class="text-2xl sm:text-3xl font-black text-yellow-400 neon-gold transition-transform duration-200 break-all px-1">
                     ×1.0
                 </div>
-                <div id="ui-synergy-info" class="mt-2 text-xs text-cyan-300 font-semibold space-y-0.5">
-                    <div>全カード効果に乗算！</div>
+                <div id="ui-synergy-info" class="mt-2 flex flex-wrap justify-center gap-1 text-[11px] text-cyan-300 font-semibold">
+                    <span class="px-2 py-0.5 rounded bg-black/40 border border-white/10">基礎 ×1.0</span>
                 </div>
             </div>
         </section>
@@ -280,11 +282,14 @@
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <div class="flex items-center gap-2">
                     <span class="text-sm sm:text-base font-black text-cyan-300">🎲 ダイストレイ (<span id="ui-dice-count">5</span>/10)</span>
-                    <span class="text-xs text-gray-400 hidden sm:inline">（タップで選択 ➔ カードをタップで発動）</span>
+                    <span id="ui-dice-hint" class="text-xs text-gray-400 hidden sm:inline">（タップ or 1〜0キーで選択）</span>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button id="btn-clear-die" onclick="clearSelectedDie()" class="hidden px-2.5 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-600 text-gray-200 font-bold text-xs transition">
+                        ✕ 選択解除
+                    </button>
                     <button id="btn-reroll" onclick="rerollDice()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-40 text-white font-bold text-xs sm:text-sm shadow transition active:scale-95">
-                        🔄 振り直し (<span id="ui-rerolls">2</span>)
+                        🔄 全未使用ダイス振り直し (<span id="ui-rerolls">2</span>)
                     </button>
                 </div>
             </div>
@@ -299,7 +304,7 @@
         <section class="bg-[#11101c]/95 border border-[#2d2b45] rounded-3xl p-3 sm:p-4 shadow-lg flex-1 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2.5 flex-wrap gap-1">
                 <span class="text-sm sm:text-base font-black text-amber-300">🃏 手札スキル</span>
-                <span id="ui-action-hint" class="text-xs font-bold text-cyan-300 animate-pulse">ダイスを選択するか、ダイス不要カードをタップ！</span>
+                <span id="ui-action-hint" class="text-xs font-bold text-cyan-300">ダイスを選択するか、ダイス不要カードをタップ！</span>
             </div>
 
             <!-- カード一覧 -->
@@ -323,8 +328,21 @@
                 <span class="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-xs font-black tracking-widest">STAGE CLEAR!</span>
                 <h2 class="text-2xl sm:text-3xl font-black text-white mt-2">勝利報酬を選択しろ！</h2>
                 <p id="reward-heal-msg" class="text-xs sm:text-sm text-emerald-400 font-bold mt-1">❤️ 休息により HPが 20 回復し、賞金を獲得した！</p>
-                <div class="mt-2 inline-block px-3 py-1 rounded-xl bg-black/50 border border-yellow-500/40 text-yellow-300 text-xs font-bold">
-                    現在の所持金: 🪙 <span id="reward-gold-display">0</span> G
+                
+                <!-- 報酬画面でも現在ステータスが確認できるミニバー -->
+                <div class="mt-2.5 flex flex-wrap justify-center gap-2 text-xs font-bold">
+                    <span class="px-3 py-1 rounded-xl bg-black/50 border border-rose-500/40 text-rose-300">
+                        ❤️ HP: <span id="reward-hp-display" class="text-white">80/80</span>
+                    </span>
+                    <span class="px-3 py-1 rounded-xl bg-black/50 border border-yellow-500/40 text-yellow-300">
+                        🪙 所持金: <span id="reward-gold-display" class="text-white">0</span> G
+                    </span>
+                    <span class="px-3 py-1 rounded-xl bg-black/50 border border-cyan-500/40 text-cyan-300">
+                        🃏 デッキ: <span id="reward-deck-display" class="text-white">8</span> 枚
+                    </span>
+                    <span class="px-3 py-1 rounded-xl bg-black/50 border border-purple-500/40 text-purple-300">
+                        🏺 遺物: <span id="reward-art-display" class="text-white">0/16</span>
+                    </span>
                 </div>
             </div>
 
@@ -346,9 +364,9 @@
                         <div>
                             <div class="text-2xl mb-1">🏺</div>
                             <div class="font-black text-purple-300 text-base sm:text-lg group-hover:underline">イカサマ遺物</div>
-                            <p class="text-xs text-gray-300 mt-1">全16種の遺物から提示された3択のうち1つを獲得する。</p>
+                            <p id="reward-art-cat-desc" class="text-xs text-gray-300 mt-1">全16種の遺物から提示された3択のうち1つを獲得する。</p>
                         </div>
-                        <span class="mt-3 text-xs font-bold text-purple-400">無料報酬を選ぶ ➔</span>
+                        <span id="reward-art-cat-cta" class="mt-3 text-xs font-bold text-purple-400">無料報酬を選ぶ ➔</span>
                     </button>
 
                     <!-- 3: ダイス改造手術 -->
@@ -368,7 +386,7 @@
                         <div class="flex items-center gap-3 text-left">
                             <span class="text-2xl">💰</span>
                             <div>
-                                <div class="font-black text-amber-300 text-sm sm:text-base">裏カジノの闇ショップ（報酬を選ぶ前に利用可能）</div>
+                                <div class="font-black text-amber-300 text-sm sm:text-base">裏カジノの闇ショップ（報酬を選ぶ前に何度でも利用可能）</div>
                                 <div class="text-xs text-gray-300">ゴールドを消費して、不要カード削除・最大HP強化・追加ダイス購入！</div>
                             </div>
                         </div>
@@ -406,7 +424,7 @@
                 </div>
                 <div class="flex justify-between items-center gap-3">
                     <span class="text-gray-400 shrink-0">獲得した遺物数</span>
-                    <span id="stat-artifacts" class="font-black text-purple-300 text-right">0 個</span>
+                    <span id="stat-artifacts" class="font-black text-purple-300 text-right">0 / 16 個</span>
                 </div>
                 <div class="flex justify-between items-center gap-3">
                     <span class="text-gray-400 shrink-0">最終所持ゴールド</span>
@@ -429,25 +447,23 @@
     <div id="rules-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="max-w-lg w-full bg-[#161526] border border-[#45416e] rounded-3xl p-5 sm:p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-black text-yellow-400">📖 ver 2.1 イカサマ＆バランス調整</h3>
+                <h3 class="text-xl font-black text-yellow-400">📖 ver 2.2 イカサマ＆快適操作ガイド</h3>
                 <button onclick="toggleModal('rules-modal', false)" class="px-3 py-1 rounded-lg bg-gray-800 text-gray-300 hover:text-white font-bold">✕</button>
             </div>
             <div class="space-y-3 text-xs sm:text-sm text-gray-300 leading-relaxed">
                 <div class="p-3 rounded-xl bg-black/40 border border-gray-800">
-                    <div class="font-bold text-cyan-300 mb-1">1. 全20階層 ＋ エンドレスモード</div>
-                    10層・15層に凶悪な中ボス、20層に真のラスボスが君臨！クリア後はHPが青天井でインフレする<span class="text-purple-300 font-bold">無限階層</span>に挑める。
+                    <div class="font-bold text-cyan-300 mb-1">1. 振り直し＆PCショートカット</div>
+                    ・ダイス未選択で振り直すと<span class="text-cyan-300 font-bold">未使用ダイス全て</span>、1個選択中なら<span class="text-yellow-300 font-bold">そのダイスだけ</span>を狙い撃ちで振り直せる！<br>
+                    ・PC操作：<span class="text-amber-300 font-bold">1〜0キー</span>でダイス選択、<span class="text-amber-300 font-bold">Rキー</span>で振り直し、<span class="text-amber-300 font-bold">Enterキー</span>でターン終了。
                 </div>
                 <div class="p-3 rounded-xl bg-black/40 border border-gray-800">
-                    <div class="font-bold text-yellow-300 mb-1">2. 無限ループ防止ルール（ver 2.1）</div>
-                    ・使用したカードは<span class="text-cyan-300 font-bold">効果解決の後</span>に捨て札へ移動（自己ドロー不可）。<br>
-                    ・1ターン中の山札リシャッフルは<span class="text-amber-300 font-bold">最大2回まで</span>。<br>
-                    ・ダイストレイの上限は<span class="text-yellow-300 font-bold">最大10個</span>。<br>
-                    ・『血のダイス』は<span class="text-rose-400 font-bold">HP6以上</span>でのみ使用可能。<br>
-                    ・『カオス・ルーレット』『ゴッドハンド』は<span class="text-purple-300 font-bold">1ターン1回制限</span>。
+                    <div class="font-bold text-purple-300 mb-1">2. 遺物の重複仕様（全16種）</div>
+                    ・遺物は全16種類あり、重複装備は不可。<br>
+                    ・全16種をコンプリートした後に遺物報酬を選ぶと、<span class="text-yellow-300 font-bold">所持済みの遺物は自動的に「+80G」に換金</span>されるぞ！
                 </div>
                 <div class="p-3 rounded-xl bg-black/40 border border-gray-800">
-                    <div class="font-bold text-purple-300 mb-1">3. 正統派のぶっ壊れシナジーを目指せ</div>
-                    無限ループに頼らずとも、ダイス改造（全面6 / ×3面）と『鏡写しのトリック』『断罪の666』『ゾロ目の悪魔』を重ねれば<span class="text-rose-400 font-bold">億・兆・京ダメージ</span>を叩き出せる！
+                    <div class="font-bold text-yellow-300 mb-1">3. 無限ループ防止バランスルール</div>
+                    ・使用カードは効果解決後に捨て札へ移動 / 山札リシャッフルは1ターン2回まで / トレイ上限10個 / 『血のダイス』はHP6以上で使用可。
                 </div>
             </div>
         </div>
@@ -455,10 +471,23 @@
 
     <div id="deck-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="max-w-2xl w-full bg-[#161526] border border-[#45416e] rounded-3xl p-5 sm:p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-black text-cyan-300">🃏 現在のデッキ一覧 (<span id="deck-modal-count">0</span>枚)</h3>
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-lg sm:text-xl font-black text-cyan-300">🃏 カード内訳確認</h3>
                 <button onclick="toggleModal('deck-modal', false)" class="px-3 py-1 rounded-lg bg-gray-800 text-gray-300 hover:text-white font-bold">✕</button>
             </div>
+            <!-- タブ切替 -->
+            <div class="flex gap-2 mb-4">
+                <button id="tab-deck-draw" onclick="openDeckModal('draw')" class="flex-1 py-2 rounded-xl text-xs sm:text-sm font-black border transition">
+                    山札 (<span id="tab-count-draw">0</span>)
+                </button>
+                <button id="tab-deck-discard" onclick="openDeckModal('discard')" class="flex-1 py-2 rounded-xl text-xs sm:text-sm font-black border transition">
+                    捨て札 (<span id="tab-count-discard">0</span>)
+                </button>
+                <button id="tab-deck-all" onclick="openDeckModal('all')" class="flex-1 py-2 rounded-xl text-xs sm:text-sm font-black border transition">
+                    全デッキ (<span id="tab-count-all">0</span>)
+                </button>
+            </div>
+            <div id="deck-modal-desc" class="text-xs text-gray-400 mb-3"></div>
             <div id="deck-modal-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5"></div>
         </div>
     </div>
@@ -657,7 +686,20 @@
             royal_straight: {
                 id: 'royal_straight', name: 'ロイヤル・ストレート', req: 'none', reqLabel: 'ダイス不要',
                 color: 'border-indigo-400', badgeColor: 'bg-indigo-950 text-indigo-200',
-                desc: () => `未使用ダイスが全て別数字なら倍率 <span class="text-yellow-300 font-black">×5倍</span>！重複があれば1組ごとに <span class="text-cyan-300 font-bold">+1.5x</span>。`
+                desc: (val, mult, state) => {
+                    if (!state || !state.dice) {
+                        return `未使用ダイスが全て別数字なら倍率 <span class="text-yellow-300 font-black">×5倍</span>！重複があれば1組ごとに <span class="text-cyan-300 font-bold">+1.5x</span>。`;
+                    }
+                    const unused = state.dice.filter(d => !d.used);
+                    const vals = unused.map(d => `${d.current.type}_${d.current.val}`);
+                    const uniqueSize = new Set(vals).size;
+                    if (unused.length >= 3 && uniqueSize === unused.length) {
+                        return `未使用が全て別数字で <span class="text-yellow-300 font-black">×5倍</span>！<br><span class="text-emerald-300 font-black">【現在: ストレート成立 ×5倍!!】</span>`;
+                    }
+                    const pairs = Math.max(1, vals.length - uniqueSize);
+                    const bonus = +(pairs * 1.5).toFixed(1);
+                    return `全バラなら×5倍 / 重複は1組+1.5x<br><span class="text-cyan-300 font-black">【現在: 重複ボーナス +${bonus}x】</span>`;
+                }
             },
             chaos_roulette: {
                 id: 'chaos_roulette', name: 'カオス・ルーレット', req: 'none', reqLabel: '1T1回 / ダイス不要',
@@ -860,7 +902,6 @@
             const healed = Math.min(gameState.maxHp - gameState.hp, 30);
             gameState.hp += healed;
             document.getElementById('reward-heal-msg').innerText = `♾️ エンドレス突入ボーナス！ HP +${healed} 回復！`;
-            document.getElementById('reward-gold-display').innerText = gameState.gold;
 
             renderAll();
             backToRewardCategories();
@@ -923,7 +964,6 @@
                 }
             }
 
-            // ターン開始時の初期ドロー（リシャッフル上限カウント外）
             while (gameState.hand.length < 5) {
                 if (!drawCard(true)) break;
             }
@@ -945,7 +985,6 @@
         }
 
         function rollSingleDieFromTemplate(faces) {
-            // ダイストレイ上限チェック（最大10個）
             if (gameState.dice.length >= MAX_DICE_IN_TRAY) {
                 return null;
             }
@@ -1013,6 +1052,13 @@
             renderAll();
         }
 
+        function clearSelectedDie() {
+            if (gameState.selectedDieIndex === null) return;
+            SoundFX.select();
+            gameState.selectedDieIndex = null;
+            renderAll();
+        }
+
         /* =====================================================================
          * 5. シナジー・総合倍率・ダメージ計算エンジン
          * ===================================================================== */
@@ -1028,13 +1074,15 @@
             return val;
         }
 
-        function getTotalMultiplier(die = null, state = gameState) {
-            if (!state || !state.dice) return 1.0;
+        function getMultiplierDetails(die = null, state = gameState) {
+            if (!state || !state.dice) return { total: 1.0, tags: [] };
             let mult = state.turnMult;
+            const tags = [`基礎 ×${formatMult(state.turnMult)}`];
 
             if (die && die.current.type === 'mult') {
                 const faceFactor = hasArtifact('royal_scepter') ? Math.pow(die.current.val, 2) : die.current.val;
                 mult *= faceFactor;
+                tags.push(`倍率面 ×${faceFactor}`);
             }
 
             if (hasArtifact('demon_doubles')) {
@@ -1046,28 +1094,40 @@
                     if (counts[key] > 1) duplicatePairs++;
                 });
                 if (duplicatePairs > 0) {
-                    mult *= Math.pow(2, duplicatePairs);
+                    const factor = Math.pow(2, duplicatePairs);
+                    mult *= factor;
+                    tags.push(`😈ゾロ目 ×${formatMult(factor)}`);
                 }
             }
 
             if (hasArtifact('inflation_gear') && state.cardsPlayedThisTurn > 0) {
-                mult *= Math.pow(1.5, state.cardsPlayedThisTurn);
+                const factor = Math.pow(1.5, state.cardsPlayedThisTurn);
+                mult *= factor;
+                tags.push(`⚙️歯車 ×${formatMult(factor)}`);
             }
 
             if (hasArtifact('scale_of_ruin') && state.hp <= state.maxHp * 0.5) {
                 mult *= 4;
+                tags.push(`⚖️背水 ×4`);
             }
 
             if (hasArtifact('crown_of_greed') && state.gold >= 10) {
                 const stacks = Math.floor(state.gold / 10);
-                mult *= (1 + stacks * 0.15);
+                const factor = 1 + stacks * 0.15;
+                mult *= factor;
+                tags.push(`👑王冠 ×${factor.toFixed(1)}`);
             }
 
             if (hasArtifact('infinity_engine') && state.turnMult > 10) {
                 mult *= 3;
+                tags.push(`♾️無限機関 ×3`);
             }
 
-            return mult;
+            return { total: mult, tags };
+        }
+
+        function getTotalMultiplier(die = null, state = gameState) {
+            return getMultiplierDetails(die, state).total;
         }
 
         function calcAttackDamage(basePower, effVal, totalMult, state = gameState) {
@@ -1079,7 +1139,7 @@
         }
 
         /* =====================================================================
-         * 6. カード使用＆エフェクト実行（無限ループ対策済み）
+         * 6. カード使用＆エフェクト実行
          * ===================================================================== */
         function getCardBlockReason(card) {
             if (card.oncePerTurn && gameState.usedOncePerTurn[card.id]) {
@@ -1105,12 +1165,20 @@
             return false;
         }
 
+        function hasAnyPlayableAction() {
+            return gameState.hand.some(cardId => {
+                const card = CARD_DB[cardId];
+                if (!card || getCardBlockReason(card)) return false;
+                if (card.req === 'none') return true;
+                return gameState.dice.some(d => canPlayCardWithDie(card, d));
+            });
+        }
+
         function playCard(handIndex) {
             const cardId = gameState.hand[handIndex];
             const card = CARD_DB[cardId];
             if (!card) return;
 
-            // 特殊条件チェック（1ターン1回、HP制限、ダイス上限）
             const blockReason = getCardBlockReason(card);
             if (blockReason) {
                 showToast(`⚠️ ${blockReason}`);
@@ -1155,12 +1223,11 @@
                 gameState.selectedDieIndex = null;
             }
 
-            // 1ターン1回制限の記録
             if (card.oncePerTurn) {
                 gameState.usedOncePerTurn[cardId] = true;
             }
 
-            // 【重要修正】手札から一時退避（効果解決が全て終わるまで捨て札に送らない！）
+            // 効果解決が終わるまで捨て札に送らない
             gameState.hand.splice(handIndex, 1);
             gameState.cardsPlayedThisTurn++;
 
@@ -1172,7 +1239,6 @@
 
             for (let c = 0; c < castTimes; c++) {
                 if (gameState.enemy.hp <= 0) break;
-                // 2回目発動時に条件を満たさなくなった場合の安全ストッパー
                 if (c > 0 && cardId === 'blood_die' && gameState.hp <= 5) {
                     showToast('🩸 HP不足のため2回目の発動が中断された！');
                     break;
@@ -1202,7 +1268,6 @@
                 }
             }
 
-            // 【重要修正】全てのドロー・効果処理が完了した「後」に使用カードを捨て札へ移動
             gameState.discardPile.push(cardId);
 
             renderAll();
@@ -1539,6 +1604,24 @@
         /* =====================================================================
          * 7. 戦闘勝利・報酬＆闇ショップ＆ダイス改造システム
          * ===================================================================== */
+        function updateRewardHeaderStats() {
+            document.getElementById('reward-hp-display').innerText = `${gameState.hp}/${gameState.maxHp}`;
+            document.getElementById('reward-gold-display').innerText = gameState.gold;
+            document.getElementById('reward-deck-display').innerText = gameState.deck.length;
+            document.getElementById('reward-art-display').innerText = `${gameState.artifacts.length}/${ARTIFACT_DB.length}`;
+
+            const allOwned = ARTIFACT_DB.every(a => hasArtifact(a.id));
+            const catDesc = document.getElementById('reward-art-cat-desc');
+            const catCta = document.getElementById('reward-art-cat-cta');
+            if (allOwned) {
+                catDesc.innerText = '全16種コンプリート済！選択すると重複ボーナスとして【+80G】を獲得！';
+                catCta.innerText = '換金報酬を選ぶ (+80G) ➔';
+            } else {
+                catDesc.innerText = `未所持の遺物を優先して3択提示（所持済 ${gameState.artifacts.length}/${ARTIFACT_DB.length}種）。`;
+                catCta.innerText = '無料報酬を選ぶ ➔';
+            }
+        }
+
         function handleEnemyDefeated() {
             SoundFX.win();
             const goldReward = gameState.enemy.gold;
@@ -1557,7 +1640,7 @@
             gameState.hp += healed;
 
             document.getElementById('reward-heal-msg').innerText = `❤️ 休息で HP +${healed} 回復 ＆ 賞金 +${goldReward}G を獲得！`;
-            document.getElementById('reward-gold-display').innerText = gameState.gold;
+            updateRewardHeaderStats();
 
             renderAll();
             backToRewardCategories();
@@ -1565,13 +1648,14 @@
         }
 
         function backToRewardCategories() {
-            document.getElementById('reward-gold-display').innerText = gameState.gold;
+            updateRewardHeaderStats();
             document.getElementById('reward-step-1').classList.remove('hidden');
             document.getElementById('reward-sub-area').classList.add('hidden');
         }
 
         function openRewardSub(category) {
             SoundFX.select();
+            updateRewardHeaderStats();
             document.getElementById('reward-step-1').classList.add('hidden');
             const subArea = document.getElementById('reward-sub-area');
             const titleEl = document.getElementById('reward-sub-title');
@@ -1589,11 +1673,15 @@
 
                 choices.forEach(cId => {
                     const card = CARD_DB[cId];
+                    const ownedCount = gameState.deck.filter(id => id === cId).length;
                     const btn = document.createElement('button');
                     btn.className = `p-4 rounded-2xl bg-[#181729] hover:bg-[#23213b] border-2 ${card.color} text-left flex flex-col justify-between transition`;
                     btn.innerHTML = `
                         <div>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${card.badgeColor}">${card.reqLabel}</span>
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${card.badgeColor}">${card.reqLabel}</span>
+                                <span class="text-[10px] font-bold text-gray-400">所持: ${ownedCount}枚</span>
+                            </div>
                             <div class="font-black text-white text-base mt-1.5">${card.name}</div>
                             <p class="text-xs text-gray-300 mt-1.5 leading-relaxed">${card.desc(6, 1, null)}</p>
                         </div>
@@ -1617,18 +1705,27 @@
                 grid.className = 'grid grid-cols-1 sm:grid-cols-3 gap-3';
 
                 choices.forEach(art => {
+                    const alreadyOwned = hasArtifact(art.id);
                     const btn = document.createElement('button');
-                    btn.className = 'p-4 rounded-2xl bg-[#1c192e] hover:bg-[#272340] border-2 border-purple-500/60 text-left flex flex-col justify-between transition';
+                    btn.className = `p-4 rounded-2xl bg-[#1c192e] hover:bg-[#272340] border-2 ${alreadyOwned ? 'border-yellow-500/70' : 'border-purple-500/60'} text-left flex flex-col justify-between transition`;
                     btn.innerHTML = `
                         <div>
-                            <div class="text-3xl mb-1.5">${art.icon}</div>
-                            <div class="font-black text-purple-300 text-base">${art.name}</div>
+                            <div class="flex items-center justify-between gap-1 mb-1.5">
+                                <span class="text-3xl">${art.icon}</span>
+                                ${alreadyOwned
+                                    ? '<span class="px-2 py-0.5 rounded bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-[10px] font-black">所持済：+80Gに変換</span>'
+                                    : '<span class="px-2 py-0.5 rounded bg-purple-950 border border-purple-400/50 text-purple-200 text-[10px] font-bold">NEW!</span>'
+                                }
+                            </div>
+                            <div class="font-black ${alreadyOwned ? 'text-yellow-300' : 'text-purple-300'} text-base">${art.name}</div>
                             <p class="text-xs text-gray-300 mt-1 leading-relaxed">${art.desc}</p>
                         </div>
-                        <div class="mt-3 text-xs font-bold text-purple-300">装備する ➔</div>
+                        <div class="mt-3 text-xs font-bold ${alreadyOwned ? 'text-yellow-300' : 'text-purple-300'}">
+                            ${alreadyOwned ? '🪙 換金する (+80G) ➔' : '装備する ➔'}
+                        </div>
                     `;
                     btn.onclick = () => {
-                        if (!hasArtifact(art.id)) {
+                        if (!alreadyOwned) {
                             gameState.artifacts.push(art);
                             if (art.id === 'berserker_chip') {
                                 gameState.maxHp += 20;
@@ -1636,6 +1733,7 @@
                             }
                         } else {
                             gameState.gold += 80;
+                            showToast('🪙 重複遺物を +80G に変換した！');
                         }
                         SoundFX.buff();
                         proceedToNextFloor();
@@ -1673,6 +1771,7 @@
                         desc: '最大HP+10 ＆ HPを全回復する。',
                         cost: 40,
                         disabled: false,
+                        reason: '',
                         buy: () => {
                             gameState.maxHp += 10;
                             gameState.hp = gameState.maxHp;
@@ -1684,6 +1783,7 @@
                         desc: '初期ダイスを1個追加する！（最大8個まで増設可能）',
                         cost: 90,
                         disabled: gameState.diceTemplates.length >= 8,
+                        reason: '上限達成 (8/8)',
                         buy: () => {
                             gameState.diceTemplates.push([
                                 { type: 'num', val: 2 }, { type: 'num', val: 3 }, { type: 'num', val: 4 },
@@ -1693,10 +1793,11 @@
                         }
                     },
                     {
-                        name: '🔥 不要カード1枚破棄（デッキ圧縮）',
-                        desc: 'デッキ内の好きなカードを1枚選んで消去し、コンボ率を高める！',
+                        name: '🔥 不要カード1枚破棄（現在 ' + gameState.deck.length + '枚）',
+                        desc: 'デッキ内の好きなカードを1枚選んで消去（最小4枚まで）。',
                         cost: 50,
                         disabled: gameState.deck.length <= 4,
+                        reason: '最小枚数 (4枚)',
                         buy: () => {
                             openRemoveCardShop();
                         }
@@ -1706,6 +1807,7 @@
                         desc: '未所持のイカサマ遺物をランダムで1つ獲得する！',
                         cost: 120,
                         disabled: ARTIFACT_DB.every(a => hasArtifact(a.id)),
+                        reason: '全16種コンプ済',
                         buy: () => {
                             const unowned = ARTIFACT_DB.filter(a => !hasArtifact(a.id));
                             if (unowned.length > 0) {
@@ -1726,13 +1828,14 @@
 
                 shopItems.forEach(item => {
                     const canAfford = gameState.gold >= item.cost && !item.disabled;
+                    const statusLabel = item.disabled ? item.reason : (gameState.gold < item.cost ? 'ゴールド不足' : `🪙 ${item.cost}G`);
                     const btn = document.createElement('button');
                     btn.className = `p-3.5 rounded-xl bg-[#1a182b] border ${canAfford ? 'border-amber-400/60 hover:bg-[#272440]' : 'border-gray-700 opacity-50 cursor-not-allowed'} text-left flex flex-col justify-between transition`;
                     btn.innerHTML = `
                         <div>
                             <div class="flex justify-between items-center gap-2">
                                 <span class="font-black text-white text-sm">${item.name}</span>
-                                <span class="px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300 font-black text-xs shrink-0">🪙 ${item.cost}G</span>
+                                <span class="px-2 py-0.5 rounded ${canAfford ? 'bg-yellow-500/20 text-yellow-300' : 'bg-gray-800 text-gray-400'} font-black text-xs shrink-0">${statusLabel}</span>
                             </div>
                             <p class="text-xs text-gray-300 mt-1">${item.desc}</p>
                         </div>
@@ -1740,7 +1843,7 @@
                     btn.onclick = () => {
                         if (!canAfford) return;
                         gameState.gold -= item.cost;
-                        document.getElementById('reward-gold-display').innerText = gameState.gold;
+                        updateRewardHeaderStats();
                         SoundFX.win();
                         item.buy();
                         if (item.name.indexOf('破棄') === -1) {
@@ -1773,6 +1876,7 @@
                 `;
                 btn.onclick = () => {
                     gameState.deck.splice(idx, 1);
+                    updateRewardHeaderStats();
                     SoundFX.hit(false);
                     showToast(`🗑️ 【${c.name}】をデッキから削除した！`);
                     openRewardSub('shop');
@@ -1880,7 +1984,7 @@
 
             document.getElementById('stat-floor').innerText = gameState.endless ? `Floor ${gameState.floor} (無限)` : `Floor ${gameState.floor} / 20`;
             document.getElementById('stat-max-dmg').innerText = formatNum(gameState.maxSingleDmg);
-            document.getElementById('stat-artifacts').innerText = `${gameState.artifacts.length} 個`;
+            document.getElementById('stat-artifacts').innerText = `${gameState.artifacts.length} / ${ARTIFACT_DB.length} 個`;
             document.getElementById('stat-gold').innerText = `${gameState.gold} G`;
         }
 
@@ -1895,10 +1999,22 @@
             document.getElementById('ui-shield').innerText = formatNum(gameState.shield);
             document.getElementById('ui-gold').innerText = gameState.gold;
             document.getElementById('ui-deck-count').innerText = gameState.drawPile.length;
+            document.getElementById('ui-discard-count').innerText = gameState.discardPile.length;
             document.getElementById('ui-reshuffle-left').innerText = Math.max(0, MAX_RESHUFFLES_PER_TURN - gameState.reshufflesThisTurn);
             document.getElementById('ui-dice-count').innerText = gameState.dice.length;
-            document.getElementById('ui-rerolls').innerText = gameState.rerolls;
-            document.getElementById('btn-reroll').disabled = gameState.rerolls <= 0;
+
+            // 振り直しボタンの親切表記（選択中なら1個だけ、未選択なら全未使用）
+            const rerollBtn = document.getElementById('btn-reroll');
+            const clearBtn = document.getElementById('btn-clear-die');
+            const isDieSelected = gameState.selectedDieIndex !== null && gameState.dice[gameState.selectedDieIndex] && !gameState.dice[gameState.selectedDieIndex].used;
+            rerollBtn.disabled = gameState.rerolls <= 0;
+            if (isDieSelected) {
+                rerollBtn.innerHTML = `🎯 選択ダイスのみ振り直し (<span id="ui-rerolls">${gameState.rerolls}</span>)`;
+                clearBtn.classList.remove('hidden');
+            } else {
+                rerollBtn.innerHTML = `🔄 全未使用ダイス振り直し (<span id="ui-rerolls">${gameState.rerolls}</span>)`;
+                clearBtn.classList.add('hidden');
+            }
 
             // 遺物バー
             document.getElementById('ui-art-count').innerText = gameState.artifacts.length;
@@ -1944,21 +2060,22 @@
                 document.getElementById('ui-enemy-svg').innerHTML = getEnemySVG(e.shape, e.color);
             }
 
-            // 総合倍率モニター
+            // 総合倍率モニター＆内訳タグ表示
             const selectedDie = gameState.selectedDieIndex !== null ? gameState.dice[gameState.selectedDieIndex] : null;
-            const liveMult = getTotalMultiplier(selectedDie);
+            const multDetail = getMultiplierDetails(selectedDie);
+            const liveMult = multDetail.total;
             const multEl = document.getElementById('ui-turn-mult');
             multEl.innerText = `×${formatMult(liveMult)}`;
 
             const synInfo = document.getElementById('ui-synergy-info');
-            let statusNotes = ['<div>全カード効果に乗算！</div>'];
+            let statusBadges = multDetail.tags.map(t => `<span class="px-1.5 py-0.5 rounded bg-black/40 border border-white/10">${t}</span>`);
             if (gameState.doubleCastNext) {
-                statusNotes.push('<div class="text-yellow-300 font-black animate-pulse">✨ 次のカード2回連続発動！</div>');
+                statusBadges.push('<span class="px-2 py-0.5 rounded bg-yellow-500/20 border border-yellow-400 text-yellow-300 font-black animate-pulse">✨ 次のカード2連続発動！</span>');
             }
             if (gameState.berserkerBonus > 0) {
-                statusNotes.push(`<div class="text-rose-300 font-bold">🎰 出目評価 +${gameState.berserkerBonus}</div>`);
+                statusBadges.push(`<span class="px-1.5 py-0.5 rounded bg-rose-950/60 border border-rose-500/40 text-rose-300">🎰 出目評価 +${gameState.berserkerBonus}</span>`);
             }
-            synInfo.innerHTML = statusNotes.join('');
+            synInfo.innerHTML = statusBadges.join('');
 
             // ダイストレイ描画
             const tray = document.getElementById('ui-dice-tray');
@@ -1967,6 +2084,7 @@
                 const isSelected = gameState.selectedDieIndex === idx;
                 const isGold = d.current.type === 'mult' || d.current.val >= 6;
                 const displayVal = d.current.type === 'mult' ? `×${d.current.val}` : d.current.val;
+                const keyHint = idx < 9 ? `${idx + 1}` : '0';
 
                 const dieEl = document.createElement('button');
                 dieEl.id = `die-btn-${idx}`;
@@ -1980,9 +2098,10 @@
                 }).join('');
 
                 dieEl.innerHTML = `
-                    <span class="text-[10px] font-bold ${isSelected ? 'text-cyan-300' : 'text-gray-400'}">
-                        ${d.used ? '使用済' : (isSelected ? '選択中' : `DIE #${idx + 1}`)}
-                    </span>
+                    <div class="w-full flex items-center justify-between text-[10px] font-bold ${isSelected ? 'text-cyan-300' : 'text-gray-400'}">
+                        <span>${d.used ? '使用済' : (isSelected ? '選択中' : `#${idx + 1}`)}</span>
+                        <span class="hidden sm:inline px-1 rounded bg-black/50 text-gray-500 text-[9px]">${keyHint}</span>
+                    </div>
                     <div class="text-2xl sm:text-4xl font-black my-1 ${d.current.type === 'mult' ? 'text-cyan-300 neon-cyan' : (d.current.val >= 6 ? 'text-yellow-300 neon-gold' : 'text-white')}">
                         ${displayVal}
                     </div>
@@ -2013,6 +2132,8 @@
                     if (card.oncePerTurn && gameState.usedOncePerTurn[card.id]) footerText = '🚫 使用済 (1T1回)';
                     else if (card.id === 'blood_die') footerText = '🩸 HP6以上で発動';
                     else if (card.id === 'dice_cloner') footerText = '🎲 ダイス上限 (10個)';
+                } else if (!playable && card.req !== 'none') {
+                    footerText = `⚠️ 条件未達 (${card.reqLabel})`;
                 } else if (readyNow) {
                     footerText = '✨ タップで即発動！';
                 } else if (card.req === 'none') {
@@ -2035,12 +2156,27 @@
                             ${card.desc(previewVal, liveMult, gameState)}
                         </p>
                     </div>
-                    <div class="mt-2 pt-1.5 border-t border-white/10 text-[10px] font-bold ${blockReason ? 'text-rose-400' : (readyNow ? 'text-cyan-300' : 'text-gray-400')}">
+                    <div class="mt-2 pt-1.5 border-t border-white/10 text-[10px] font-bold ${(blockReason || (!playable && card.req !== 'none')) ? 'text-rose-400' : (readyNow ? 'text-cyan-300' : 'text-gray-400')}">
                         ${footerText}
                     </div>
                 `;
                 handArea.appendChild(cardBtn);
             });
+
+            // ターン終了ボタンの状態表示（誤終了防止）
+            const endBtn = document.getElementById('btn-end-turn');
+            const actionHint = document.getElementById('ui-action-hint');
+            if (hasAnyPlayableAction()) {
+                endBtn.innerHTML = '⏳ ターン終了（まだ行動可能）';
+                endBtn.className = 'w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-800 to-purple-900 hover:from-rose-700 hover:to-purple-800 text-gray-200 font-black text-sm sm:text-base shadow-lg transition transform active:scale-95';
+                actionHint.innerText = isDieSelected ? '✨ 発動するカードをタップ！' : 'ダイスを選択するか、ダイス不要カードをタップ！';
+                actionHint.className = 'text-xs font-bold text-cyan-300 animate-pulse';
+            } else {
+                endBtn.innerHTML = '✅ 行動完了！ターン終了（敵の行動へ）';
+                endBtn.className = 'w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-black font-black text-sm sm:text-base shadow-lg shadow-cyan-500/30 transition transform active:scale-95';
+                actionHint.innerText = 'このターンで使えるカードはありません！ターン終了しよう';
+                actionHint.className = 'text-xs font-bold text-emerald-300';
+            }
         }
 
         function highlightValidDice(card) {
@@ -2055,19 +2191,49 @@
             });
         }
 
-        function openDeckModal() {
-            document.getElementById('deck-modal-count').innerText = gameState.deck.length;
+        function openDeckModal(tab = 'draw') {
+            document.getElementById('tab-count-draw').innerText = gameState.drawPile.length;
+            document.getElementById('tab-count-discard').innerText = gameState.discardPile.length;
+            document.getElementById('tab-count-all').innerText = gameState.deck.length;
+
+            const tabs = ['draw', 'discard', 'all'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-deck-${t}`);
+                if (t === tab) {
+                    btn.className = 'flex-1 py-2 rounded-xl text-xs sm:text-sm font-black border border-cyan-400 bg-cyan-950/80 text-cyan-200 transition';
+                } else {
+                    btn.className = 'flex-1 py-2 rounded-xl text-xs sm:text-sm font-black border border-gray-700 bg-[#11101d] text-gray-400 hover:text-white transition';
+                }
+            });
+
+            const descEl = document.getElementById('deck-modal-desc');
+            let targetList = [];
+            if (tab === 'draw') {
+                targetList = [...gameState.drawPile].sort();
+                descEl.innerText = '次にドローされる山札の残りカード一覧（順不同表示）';
+            } else if (tab === 'discard') {
+                targetList = [...gameState.discardPile];
+                descEl.innerText = 'このターンや前のターンに使用した捨て札一覧（山札が尽きると再補充されます）';
+            } else {
+                targetList = [...gameState.deck];
+                descEl.innerText = '現在の所持デッキ全体（手札・山札・捨て札の合計）';
+            }
+
             const list = document.getElementById('deck-modal-list');
-            list.innerHTML = gameState.deck.map(cId => {
-                const c = CARD_DB[cId];
-                return `
-                    <div class="p-3 rounded-xl bg-[#11101d] border ${c.color}">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.badgeColor}">${c.reqLabel}</span>
-                        <div class="font-black text-white text-sm mt-1">${c.name}</div>
-                        <p class="text-xs text-gray-400 mt-1">${c.desc(6, 1, null)}</p>
-                    </div>
-                `;
-            }).join('');
+            if (targetList.length === 0) {
+                list.innerHTML = '<div class="col-span-full text-center py-6 text-xs text-gray-500">カードがありません</div>';
+            } else {
+                list.innerHTML = targetList.map(cId => {
+                    const c = CARD_DB[cId];
+                    return `
+                        <div class="p-3 rounded-xl bg-[#11101d] border ${c.color}">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.badgeColor}">${c.reqLabel}</span>
+                            <div class="font-black text-white text-sm mt-1">${c.name}</div>
+                            <p class="text-xs text-gray-400 mt-1">${c.desc(6, 1, null)}</p>
+                        </div>
+                    `;
+                }).join('');
+            }
             toggleModal('deck-modal', true);
         }
 
@@ -2182,6 +2348,29 @@
                 <path d="M 42 76 Q 60 64 78 76" fill="none" stroke="${color}" stroke-width="3.5" stroke-linecap="round"/>
             </svg>`;
         }
+
+        // PC用キーボードショートカット
+        document.addEventListener('keydown', (e) => {
+            if (e.repeat) return;
+            const gameVisible = !document.getElementById('game-screen').classList.contains('hidden');
+            const anyModalOpen = ['reward-modal', 'result-screen', 'rules-modal', 'deck-modal']
+                .some(id => !document.getElementById(id).classList.contains('hidden'));
+            if (!gameVisible || anyModalOpen) return;
+
+            if (e.key >= '1' && e.key <= '9') {
+                const idx = parseInt(e.key, 10) - 1;
+                if (gameState.dice && gameState.dice[idx]) selectDie(idx);
+            } else if (e.key === '0') {
+                if (gameState.dice && gameState.dice[9]) selectDie(9);
+            } else if (e.key === 'r' || e.key === 'R') {
+                rerollDice();
+            } else if (e.key === 'Escape') {
+                clearSelectedDie();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                endPlayerTurn();
+            }
+        });
 
         window.onload = () => {};
     </script>
