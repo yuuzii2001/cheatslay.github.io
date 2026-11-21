@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KILLZONE FORTRESS 〜一本道殲滅タワーディフェンス〜</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #090b10;
+            --panel: #121622;
+            --accent: #f59e0b;
+            --cyan: #06b6d4;
+            --danger: #ef4444;
+        }
+        body {
+            background-color: var(--bg-main);
+            background-image:
+                radial-gradient(circle at 10% 10%, rgba(245, 158, 11, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+            color: #eef2ff;
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+        canvas {
+            touch-action: none;
+            image-rendering: auto;
+        }
+        .tool-btn {
+            transition: all 0.15s ease;
+        }
+        .tool-btn.active {
+            border-color: #f59e0b !important;
+            background: linear-gradient(145deg, #2d2210, #1a140a) !important;
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
+            transform: translateY(-2px);
+        }
+        .neon-amber { text-shadow: 0 0 12px rgba(245, 158, 11, 0.7); }
+        .neon-cyan { text-shadow: 0 0 12px rgba(6, 182, 212, 0.7); }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.65); }
+            50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+        }
+        .wave-ready-pulse { animation: pulseGlow 1.5s infinite; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ==================== タイトル画面 ==================== -->
+    <div id="title-screen" class="flex-1 flex items-center justify-center p-4">
+        <div class="max-w-xl w-full bg-[#121622]/95 border-2 border-amber-500/40 rounded-3xl p-6 sm:p-10 text-center shadow-2xl">
+            <div class="inline-block px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-black tracking-widest mb-3">
+                MAZE BUILDING &amp; KILLZONE TD
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-400 to-rose-500 mb-2">
+                KILLZONE FORTRESS
+            </h1>
+            <p class="text-cyan-300 font-bold text-base sm:text-lg neon-cyan mb-6">
+                〜 背後が山の要塞・一本道殲滅防衛 〜
+            </p>
+            <p class="text-gray-300 text-sm leading-relaxed mb-7">
+                背後は天然の岩山。敵の侵入口は左端の1ヶ所のみ。<br>
+                <span class="text-amber-300 font-bold">防壁とタレットで敵の通り道を1本に絞り込み</span>、<br>
+                減速トラップと十字砲火の<span class="text-rose-400 font-bold">極悪キルゾーン</span>で大群を一瞬で溶かせ！
+            </p>
+            <div class="grid grid-cols-3 gap-2 text-xs text-left mb-7 bg-black/40 p-3.5 rounded-2xl border border-gray-800">
+                <div>
+                    <div class="font-black text-amber-300">🧱 自由迷路建築</div>
+                    <div class="text-gray-400 mt-0.5">敵は最短経路を自動計算。壁でジグザグの1本道を作れ！</div>
+                </div>
+                <div>
+                    <div class="font-black text-rose-400">🔥 6種の殲滅兵器</div>
+                    <div class="text-gray-400 mt-0.5">火炎放射・連鎖電撃・直線貫通レールガンで一斉射撃！</div>
+                </div>
+                <div>
+                    <div class="font-black text-cyan-300">♾️ 全20W＋無限</div>
+                    <div class="text-gray-400 mt-0.5">5Waveごとに巨大ボス襲来。クリア後はエンドレス対応！</div>
+                </div>
+            </div>
+            <button onclick="startGame()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-black font-black text-lg sm:text-xl shadow-lg shadow-amber-600/25 transition transform hover:scale-[1.02] active:scale-95">
+                🛡️ 要塞の指揮を執る（出撃）
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== メインゲーム画面 ==================== -->
+    <div id="game-screen" class="hidden flex-1 flex flex-col max-w-6xl w-full mx-auto px-2.5 sm:px-4 py-2.5 gap-2.5">
+
+        <!-- トップHUD -->
+        <header class="bg-[#121622]/95 border border-[#2a3147] rounded-2xl px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+            <div class="flex items-center gap-3 sm:gap-5 flex-wrap text-xs sm:text-sm font-black">
+                <div class="px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300">
+                    WAVE <span id="ui-wave" class="text-white text-base">0</span><span id="ui-wave-max" class="text-amber-300/70">/20</span>
+                </div>
+                <div class="flex items-center gap-1 text-rose-400">
+                    <span>❤️ 要塞耐久:</span>
+                    <span id="ui-life" class="text-white text-base">20</span>
+                </div>
+                <div class="flex items-center gap-1 text-yellow-400">
+                    <span>🪙 資源:</span>
+                    <span id="ui-gold" class="text-white text-base">180</span>G
+                </div>
+                <div class="hidden md:flex items-center gap-1 text-cyan-300">
+                    <span>💀 撃破:</span>
+                    <span id="ui-kills" class="text-white">0</span>
+                </div>
+                <div class="hidden sm:flex items-center gap-1 text-emerald-300">
+                    <span>📏 経路長:</span>
+                    <span id="ui-path-len" class="text-white">14</span>マス
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                <!-- 倍速ボタン -->
+                <button id="btn-speed" onclick="cycleSpeed()" class="px-2.5 py-1.5 rounded-xl bg-[#1d2336] hover:bg-[#29324d] border border-[#3b466b] text-xs font-black text-cyan-300 transition">
+                    ⏩ 1x
+                </button>
+                <!-- ミュート -->
+                <button id="btn-mute" onclick="toggleMute()" class="px-2.5 py-1.5 rounded-xl bg-[#1d2336] hover:bg-[#29324d] border border-[#3b466b] text-xs font-bold transition" title="効果音 ON/OFF">
+                    🔊
+                </button>
+                <!-- ヘルプ -->
+                <button onclick="toggleHelp(true)" class="px-2.5 py-1.5 rounded-xl bg-[#1d2336] hover:bg-[#29324d] border border-[#3b466b] text-xs font-black text-amber-300 transition">
+                    ？
+                </button>
+                <!-- Wave開始ボタン -->
+                <button id="btn-start-wave" onclick="startNextWave()" class="px-3.5 sm:px-5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-black font-black text-xs sm:text-sm shadow-lg transition active:scale-95 wave-ready-pulse">
+                    ▶ WAVE 1 開始
+                </button>
+            </div>
+        </header>
+
+        <!-- メインマップエリア（Canvas） -->
+        <div class="relative bg-[#0c101a] border-2 border-[#2a3147] rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center">
+            <canvas id="game-canvas" class="w-full h-auto block cursor-crosshair"></canvas>
+
+            <!-- 敵予告オーバーレイ（Wave準備中） -->
+            <div id="wave-preview-pill" class="absolute top-2.5 left-2.5 px-3 py-1 rounded-xl bg-black/75 border border-amber-500/40 text-[11px] sm:text-xs font-bold text-gray-200 pointer-events-none backdrop-blur-sm">
+                🛠️ 準備フェーズ：壁とタレットで1本道キルゾーンを構築しろ！
+            </div>
+        </div>
+
+        <!-- 下部コントロールエリア：建築メニュー ＋ 選択タレット詳細 -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5">
+
+            <!-- 建築パレット -->
+            <section class="lg:col-span-8 bg-[#121622]/95 border border-[#2a3147] rounded-2xl p-2.5 sm:p-3 shadow-lg">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs sm:text-sm font-black text-amber-300">🏗️ 建築メニュー（タップで選択 ➔ マップに配置）</span>
+                    <button id="btn-inspect-mode" onclick="selectBuildTool(null)" class="px-2.5 py-0.5 rounded-lg bg-[#1d2336] border border-cyan-500/40 text-[11px] font-bold text-cyan-300 hover:bg-[#27304a]">
+                        🔍 強化・選択モード
+                    </button>
+                </div>
+                <div id="build-palette" class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2">
+                    <!-- JS生成 -->
+                </div>
+            </section>
+
+            <!-- 選択中タレットの情報＆アップグレードパネル -->
+            <section id="inspector-panel" class="lg:col-span-4 bg-[#121622]/95 border border-[#2a3147] rounded-2xl p-3 shadow-lg flex flex-col justify-between min-h-[126px]">
+                <div id="inspector-empty" class="flex-1 flex flex-col items-center justify-center text-center text-xs text-gray-400 py-2">
+                    <div class="text-lg mb-1">🎯 兵器詳細 / キルゾーン設計</div>
+                    <div>マップ上の設置済みタレットをタップすると<br><span class="text-amber-300 font-bold">レベルアップ強化</span>や<span class="text-rose-400 font-bold">撤去（70%返金）</span>ができるぞ！</div>
+                </div>
+
+                <div id="inspector-content" class="hidden flex-1 flex flex-col justify-between gap-2">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <span id="ins-icon" class="text-lg">🔫</span>
+                                <span id="ins-name" class="font-black text-sm text-white">ガトリング砲</span>
+                                <span id="ins-lv" class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-black">Lv.1</span>
+                            </div>
+                            <div id="ins-stats" class="text-[11px] text-gray-300 mt-1">火力: 12 / 連射: 高 / 射程: 3.2</div>
+                        </div>
+                        <button onclick="deselectPlaced()" class="text-xs text-gray-400 hover:text-white px-1.5">✕</button>
+                    </div>
+
+                    <div id="ins-target-row" class="flex items-center justify-between gap-2 bg-black/35 px-2.5 py-1 rounded-lg border border-gray-800">
+                        <span class="text-[11px] text-gray-400 font-bold">狙う敵:</span>
+                        <button id="btn-target-mode" onclick="cycleTargetMode()" class="text-[11px] font-black text-cyan-300 hover:underline">
+                            🎯 拠点に一番近い敵
+                        </button>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button id="btn-upgrade" onclick="upgradeSelected()" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-40 text-black font-black text-xs transition">
+                            ⬆ 強化 (50G)
+                        </button>
+                        <button id="btn-sell" onclick="sellSelected()" class="px-3 py-2 rounded-xl bg-rose-950/90 hover:bg-rose-900 border border-rose-500/50 text-rose-200 font-bold text-xs transition">
+                            💰 撤去 (+28G)
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ==================== リザルト / クリアモーダル ==================== -->
+    <div id="result-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-[#121622] border-2 border-amber-500/50 rounded-3xl p-6 text-center shadow-2xl">
+            <div id="res-badge" class="inline-block px-3.5 py-1 rounded-full text-xs font-black tracking-widest mb-3">RESULT</div>
+            <h2 id="res-title" class="text-3xl font-black mb-2">要塞陥落……</h2>
+            <p id="res-desc" class="text-xs sm:text-sm text-gray-300 mb-5">キルゾーンが突破されてしまった！</p>
+            <div class="bg-black/40 border border-gray-800 rounded-2xl p-4 mb-5 space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-gray-400">到達ウェーブ</span><span id="res-wave" class="font-black text-amber-300">Wave 1</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">総撃破数</span><span id="res-kills" class="font-black text-cyan-300">0 体</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">最長キルゾーン経路</span><span id="res-path" class="font-black text-emerald-300">14 マス</span></div>
+            </div>
+            <div class="space-y-2.5">
+                <button id="btn-continue-endless" onclick="continueEndless()" class="hidden w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:brightness-110 text-white font-black text-base shadow-lg transition">
+                    ♾️ エンドレス防衛へ突入（Wave 21〜）
+                </button>
+                <button onclick="startGame()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-black font-black text-base shadow-lg transition">
+                    🔄 新しい要塞を築く（リトライ）
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ルール・コツモーダル ==================== -->
+    <div id="help-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="max-w-lg w-full bg-[#121622] border border-[#3b466b] rounded-3xl p-5 sm:p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg sm:text-xl font-black text-amber-300">📖 極悪キルゾーン構築のコツ</h3>
+                <button onclick="toggleHelp(false)" class="px-3 py-1 rounded-lg bg-gray-800 text-gray-300 hover:text-white font-bold">✕</button>
+            </div>
+            <div class="space-y-3 text-xs sm:text-sm text-gray-300 leading-relaxed">
+                <div class="p-3 rounded-xl bg-black/40 border border-gray-800">
+                    <div class="font-bold text-amber-300 mb-1">1. 壁で「ジグザグの1本道」を作れ！</div>
+                    安い<span class="text-white font-bold">🧱防壁(10G)</span>を使って敵のルートを遠回りさせよう。敵が歩く距離が伸びるほど、同じタレットでも2倍・3倍の時間をかけて撃ち続けられる！（※完全に道を塞ぐことは不可）
+                </div>
+                <div class="p-3 rounded-xl bg-black/40 border border-gray-800">
+                    <div class="font-bold text-cyan-300 mb-1">2. ❄️クライオ床は「通路のど真ん中」に敷ける！</div>
+                    他のタレットと違い、<span class="text-cyan-300 font-bold">❄️クライオ床</span>は敵が踏める減速トラップだ。火炎放射器やガトリングの射程内に敷き詰めると、敵がスローモーションで溶けていくぞ！
+                </div>
+                <div class="p-3 rounded-xl bg-black/40 border border-gray-800">
+                    <div class="font-bold text-rose-400 mb-1">3. 🚀レールガンは「長い直線の突き当たり」へ</div>
+                    レールガンは撃った方向に一直線に貫通レーザーを放つ。1本道の長い直線通路の奥に置けば、並んだ敵の列を1発で串刺しにできる！
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- トースト通知 -->
+    <div id="toast-box" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-opacity duration-300 opacity-0">
+        <div id="toast-msg" class="px-4 py-2 rounded-full bg-rose-950/95 border border-rose-400 text-rose-100 text-xs sm:text-sm font-bold shadow-lg whitespace-nowrap"></div>
+    </div>
+
+    <script>
+        /* =====================================================================
+         * 1. Web Audio API 効果音エンジン
+         * ===================================================================== */
+        const SFX = {
+            ctx: null,
+            muted: false,
+            lastShootTime: 0,
+            init() {
+                if (!this.ctx) {
+                    const AC = window.AudioContext || window.webkitAudioContext;
+                    if (AC) this.ctx = new AC();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+            },
+            tone(freq, type, dur, vol = 0.08, endFreq = null) {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, now);
+                    if (endFreq) osc.frequency.exponentialRampToValueAtTime(endFreq, now + dur);
+                    gain.gain.setValueAtTime(vol, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + dur);
+                } catch (e) {}
+            },
+            shoot(kind) {
+                const now = performance.now();
+                if (now - this.lastShootTime < 38) return; // 音割れ防止スロットル
+                this.lastShootTime = now;
+                if (kind === 'gatling') this.tone(240 + Math.random() * 80, 'square', 0.04, 0.05, 90);
+                else if (kind === 'flamer') this.tone(130 + Math.random() * 50, 'sawtooth', 0.07, 0.04, 60);
+                else if (kind === 'tesla') this.tone(880, 'sawtooth', 0.09, 0.06, 260);
+                else if (kind === 'railgun') {
+                    this.tone(180, 'sawtooth', 0.24, 0.14, 38);
+                    this.tone(520, 'triangle', 0.18, 0.09, 120);
+                }
+            },
+            build() { this.tone(420, 'triangle', 0.09, 0.12, 680); },
+            upgrade() {
+                this.tone(520, 'sine', 0.1, 0.12, 780);
+                setTimeout(() => this.tone(780, 'sine', 0.14, 0.12, 1040), 75);
+            },
+            sell() { this.tone(520, 'triangle', 0.1, 0.1, 320); },
+            kill(isBoss = false) {
+                if (isBoss) {
+                    this.tone(110, 'sawtooth', 0.45, 0.2, 25);
+                    setTimeout(() => this.tone(523, 'triangle', 0.25, 0.15, 1046), 120);
+                } else {
+                    this.tone(320, 'sine', 0.06, 0.05, 580);
+                }
+            },
+            alert() { this.tone(160, 'sawtooth', 0.2, 0.14, 90); },
+            waveStart() {
+                this.tone(330, 'triangle', 0.12, 0.12);
+                setTimeout(() => this.tone(440, 'triangle', 0.12, 0.12), 110);
+                setTimeout(() => this.tone(660, 'triangle', 0.22, 0.14), 220);
+            }
+        };
+
+        function toggleMute() {
+            SFX.muted = !SFX.muted;
+            document.getElementById('btn-mute').innerText = SFX.muted ? '🔇' : '🔊';
+        }
+
+        /* =====================================================================
+         * 2. マップ＆兵器・敵データ定義
+         * ===================================================================== */
+        const COLS = 15;
+        const ROWS = 9;
+        const TILE = 56; // 内部解像度: 840 x 504
+        const SPAWN = { x: 0, y: 4 };
+        const CORE = { x: COLS - 1, y: 4 };
+
+        // タイル種別: 0=空き地, 1=天然の岩山（破壊不可）, 2=防壁/タレット（通行不可）, 3=クライオ床（通行可）
+        const TOWER_DEFS = {
+            wall: {
+                id: 'wall', name: '防壁', icon: '🧱', cost: 10,
+                isBlocking: true, isTrap: false, isCombat: false,
+                color: '#64748b', accent: '#94a3b8',
+                shortDesc: '進路を曲げる壁',
+                range: 0, dmg: 0, fireRate: 0
+            },
+            slow: {
+                id: 'slow', name: 'クライオ床', icon: '❄️', cost: 35,
+                isBlocking: false, isTrap: true, isCombat: false,
+                color: '#0ea5e9', accent: '#67e8f9',
+                shortDesc: '通路設置・55%減速',
+                range: 0.65, slowFactor: 0.45, dmg: 2, fireRate: 0
+            },
+            gatling: {
+                id: 'gatling', name: 'ガトリング', icon: '🔫', cost: 40,
+                isBlocking: true, isTrap: false, isCombat: true,
+                color: '#f59e0b', accent: '#fde047',
+                shortDesc: '超高速連射',
+                range: 3.1, dmg: 11, fireRate: 6.5, projSpeed: 540
+            },
+            flamer: {
+                id: 'flamer', name: '火炎放射', icon: '🔥', cost: 65,
+                isBlocking: true, isTrap: false, isCombat: true,
+                color: '#ef4444', accent: '#fb923c',
+                shortDesc: '近距離・範囲貫通',
+                range: 2.35, dmg: 18, fireRate: 4.5, coneAngle: 0.62
+            },
+            tesla: {
+                id: 'tesla', name: 'テスラ砲', icon: '⚡', cost: 80,
+                isBlocking: true, isTrap: false, isCombat: true,
+                color: '#a855f7', accent: '#38bdf8',
+                shortDesc: '4体連鎖・装甲貫通',
+                range: 3.3, dmg: 30, fireRate: 1.45, chains: 4
+            },
+            railgun: {
+                id: 'railgun', name: 'レールガン', icon: '🚀', cost: 115,
+                isBlocking: true, isTrap: false, isCombat: true,
+                color: '#ec4899', accent: '#22d3ee',
+                shortDesc: '超射程・直線全貫通',
+                range: 6.2, dmg: 95, fireRate: 0.58
+            }
+        };
+
+        const TARGET_MODES = [
+            { id: 'first', label: '🎯 拠点に一番近い敵' },
+            { id: 'strong', label: '💀 HPが最も高い敵' },
+            { id: 'close', label: '📍 タレットに一番近い敵' }
+        ];
+
+        const ENEMY_TYPES = {
+            grunt: { name: '歩兵', color: '#4ade80', radius: 11, hp: 38, speed: 62, armor: 0, gold: 5, score: 1 },
+            runner: { name: '高速ランナー', color: '#38bdf8', radius: 9, hp: 26, speed: 108, armor: 0, gold: 6, score: 1 },
+            swarm: { name: '蟲の大群', color: '#facc15', radius: 7.5, hp: 18, speed: 84, armor: 0, gold: 3, score: 1 },
+            tank: { name: '重装戦車兵', color: '#f97316', radius: 14, hp: 135, speed: 40, armor: 5, gold: 12, score: 2 },
+            regen: { name: '再生変異体', color: '#c084fc', radius: 12, hp: 95, speed: 56, armor: 1, regen: 10, gold: 10, score: 2 },
+            boss: { name: '攻城巨兵ボス', color: '#f43f5e', radius: 20, hp: 720, speed: 34, armor: 8, regen: 14, gold: 90, isBoss: true, score: 10 }
+        };
+
+        /* =====================================================================
+         * 3. ゲーム状態 (State)
+         * ===================================================================== */
+        let canvas, ctx;
+        let state = null;
+        let lastFrameTime = 0;
+        let animId = null;
+
+        function createInitialGrid() {
+            const g = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+            // 右端（拠点の背後）は天然の岩山で鉄壁ガード！中央CORE(14,4)のみ開いている
+            for (let y = 0; y < ROWS; y++) {
+                if (y !== CORE.y) g[y][COLS - 1] = 1;
+            }
+            // 上下の岩山張り出し（背後は山感＆キルゾーンの起点になる天然障害物）
+            const mountains = [
+                [COLS - 2, 0], [COLS - 2, 1], [COLS - 2, ROWS - 1], [COLS - 2, ROWS - 2],
+                [5, 2], [5, 6], [9, 4], [3, 0], [10, 8]
+            ];
+            mountains.forEach(([x, y]) => {
+                if (!(x === SPAWN.x && y === SPAWN.y) && !(x === CORE.x && y === CORE.y)) {
+                    g[y][x] = 1;
+                }
+            });
+            return g;
+        }
+
+        function startGame() {
+            SFX.init();
+            SFX.waveStart();
+
+            state = {
+                grid: createInitialGrid(),
+                towers: [],       // { id, x, y, type, level, invested, angle, cooldown, targetModeIdx, kills }
+                enemies: [],      // { id, type, x, y, hp, maxHp, speed, armor, regen, gold, radius, color, slowTimer, slowFactor, isBoss }
+                projectiles: [],  // ガトリング弾
+                beams: [],        // テスラ・レールガン・火炎の残光エフェクト
+                particles: [],    // 爆発・火花
+                floatTexts: [],   // ダメージ＆ゴールド獲得表記
+                distMap: null,    // Flow Field（拠点までの距離マップ）
+                previewPath: [],  // 進軍ルート点線描画用
+                wave: 0,
+                maxWaves: 20,
+                endless: false,
+                waveActive: false,
+                spawnQueue: [],
+                spawnTimer: 0,
+                life: 20,
+                gold: 185,
+                kills: 0,
+                bestPathLen: 14,
+                speedMult: 1,
+                selectedBuild: 'wall',
+                selectedTowerId: null,
+                hoverTile: null,
+                shakeTimer: 0,
+                gameOver: false,
+                victoryShown: false
+            };
+
+            computeFlowField();
+            buildPaletteUI();
+
+            document.getElementById('title-screen').classList.add('hidden');
+            document.getElementById('result-modal').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            updateHUD();
+            updateInspector();
+
+            lastFrameTime = performance.now();
+            if (animId) cancelAnimationFrame(animId);
+            animId = requestAnimationFrame(gameLoop);
+        }
+
+        function continueEndless() {
+            state.endless = true;
+            document.getElementById('result-modal').classList.add('hidden');
+            updateHUD();
+            showToast('♾️ エンドレスモード突入！限界までキルゾーンを強化しろ！', 'cyan');
+        }
+
+        /* =====================================================================
+         * 4. BFS経路探索（Flow Field：どんな迷路でも最短1本道を即計算）
+         * ===================================================================== */
+        function computeDistMap(grid) {
+            const dist = Array.from({ length: ROWS }, () => Array(COLS).fill(Infinity));
+            const q = [{ x: CORE.x, y: CORE.y }];
+            dist[CORE.y][CORE.x] = 0;
+
+            const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+            let head = 0;
+            while (head < q.length) {
+                const cur = q[head++];
+                const nextD = dist[cur.y][cur.x] + 1;
+                for (const [dx, dy] of dirs) {
+                    const nx = cur.x + dx;
+                    const ny = cur.y + dy;
+                    if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) continue;
+                    // 0(空き地) と 3(クライオ床) は通行可能
+                    if (grid[ny][nx] === 1 || grid[ny][nx] === 2) continue;
+                    if (dist[ny][nx] > nextD) {
+                        dist[ny][nx] = nextD;
+                        q.push({ x: nx, y: ny });
+                    }
+                }
+            }
+            return dist;
+        }
+
+        function computeFlowField() {
+            state.distMap = computeDistMap(state.grid);
+            // スポーンから拠点への代表パスを抽出（点線プレビュー用）
+            const path = [];
+            let cx = SPAWN.x, cy = SPAWN.y;
+            let guard = 0;
+            while (guard++ < COLS * ROWS) {
+                path.push({ x: cx, y: cy });
+                if (cx === CORE.x && cy === CORE.y) break;
+                const dirs = [[1, 0], [0, 1], [0, -1], [-1, 0]];
+                let best = null;
+                let bestD = state.distMap[cy][cx];
+                for (const [dx, dy] of dirs) {
+                    const nx = cx + dx, ny = cy + dy;
+                    if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) continue;
+                    if (state.distMap[ny][nx] < bestD) {
+                        bestD = state.distMap[ny][nx];
+                        best = { x: nx, y: ny };
+                    }
+                }
+                if (!best) break;
+                cx = best.x;
+                cy = best.y;
+            }
+            state.previewPath = path;
+            if (path.length > state.bestPathLen) state.bestPathLen = path.length;
+        }
+
+        function canPlaceBlockingAt(tx, ty) {
+            if (tx === SPAWN.x && ty === SPAWN.y) return { ok: false, reason: '敵の侵入口には置けません！' };
+            if (tx === CORE.x && ty === CORE.y) return { ok: false, reason: '要塞コアには置けません！' };
+            if (state.grid[ty][tx] !== 0) return { ok: false, reason: 'すでに障害物・施設があります！' };
+
+            // 戦闘中、そのマスに敵が乗っている場合は建設不可
+            for (const e of state.enemies) {
+                const ex = Math.floor(e.x / TILE);
+                const ey = Math.floor(e.y / TILE);
+                if (ex === tx && ey === ty) {
+                    return { ok: false, reason: '敵がいるマスには建築できません！' };
+                }
+            }
+
+            // 仮置きしてBFSチェック（スポーン＆全生存敵が拠点へ到達できるか）
+            state.grid[ty][tx] = 2;
+            const testDist = computeDistMap(state.grid);
+            let valid = Number.isFinite(testDist[SPAWN.y][SPAWN.x]);
+            if (valid) {
+                for (const e of state.enemies) {
+                    const ex = Math.max(0, Math.min(COLS - 1, Math.floor(e.x / TILE)));
+                    const ey = Math.max(0, Math.min(ROWS - 1, Math.floor(e.y / TILE)));
+                    if (!Number.isFinite(testDist[ey][ex])) {
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+            state.grid[ty][tx] = 0;
+
+            if (!valid) {
+                return { ok: false, reason: '⚠️ 通り道を完全に塞ぐことはできません！' };
+            }
+            return { ok: true };
+        }
+
+        /* =====================================================================
+         * 5. 建築・強化・撤去操作
+         * ===================================================================== */
+        function buildPaletteUI() {
+            const container = document.getElementById('build-palette');
+            container.innerHTML = '';
+            Object.values(TOWER_DEFS).forEach(def => {
+                const btn = document.createElement('button');
+                btn.id = `tool-btn-${def.id}`;
+                btn.className = `tool-btn p-2 rounded-xl bg-[#181e2e] hover:bg-[#222a40] border-2 border-[#2d3652] text-left flex flex-col justify-between`;
+                btn.onclick = () => selectBuildTool(def.id);
+                btn.innerHTML = `
+                    <div class="flex items-center justify-between gap-1">
+                        <span class="text-lg sm:text-xl leading-none">${def.icon}</span>
+                        <span class="px-1.5 py-0.5 rounded bg-black/50 text-yellow-300 font-black text-[10px]">${def.cost}G</span>
+                    </div>
+                    <div class="mt-1">
+                        <div class="font-black text-white text-[11px] sm:text-xs leading-tight">${def.name}</div>
+                        <div class="text-[9px] sm:text-[10px] text-gray-400 leading-tight mt-0.5">${def.shortDesc}</div>
+                    </div>
+                `;
+                container.appendChild(btn);
+            });
+            refreshToolHighlights();
+        }
+
+        function selectBuildTool(toolId) {
+            SFX.init();
+            state.selectedBuild = toolId;
+            if (toolId !== null) state.selectedTowerId = null;
+            refreshToolHighlights();
+            updateInspector();
+        }
+
+        function refreshToolHighlights() {
+            Object.keys(TOWER_DEFS).forEach(id => {
+                const el = document.getElementById(`tool-btn-${id}`);
+                if (!el) return;
+                if (state.selectedBuild === id) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+            const inspectBtn = document.getElementById('btn-inspect-mode');
+            if (state.selectedBuild === null) {
+                inspectBtn.className = 'px-2.5 py-0.5 rounded-lg bg-cyan-600 text-black border border-cyan-300 text-[11px] font-black';
+            } else {
+                inspectBtn.className = 'px-2.5 py-0.5 rounded-lg bg-[#1d2336] border border-cyan-500/40 text-[11px] font-bold text-cyan-300 hover:bg-[#27304a]';
+            }
+        }
+
+        function handleTileClick(tx, ty) {
+            if (!state || state.gameOver) return;
+            if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS) return;
+
+            // 既にタレット/壁/罠があるマスをクリックしたら、その施設を選択して強化パネルを開く
+            const existing = state.towers.find(t => t.x === tx && t.y === ty);
+            if (existing) {
+                state.selectedTowerId = existing.id;
+                SFX.init();
+                SFX.tone(540, 'sine', 0.06, 0.08, 720);
+                updateInspector();
+                return;
+            }
+
+            // 建築モードでない場合は選択解除のみ
+            if (!state.selectedBuild) {
+                state.selectedTowerId = null;
+                updateInspector();
+                return;
+            }
+
+            const def = TOWER_DEFS[state.selectedBuild];
+            if (state.gold < def.cost) {
+                SFX.alert();
+                showToast(`🪙 資源不足！（あと ${def.cost - state.gold}G 必要）`);
+                return;
+            }
+
+            if (def.isBlocking) {
+                const check = canPlaceBlockingAt(tx, ty);
+                if (!check.ok) {
+                    SFX.alert();
+                    showToast(check.reason);
+                    return;
+                }
+                state.grid[ty][tx] = 2;
+            } else if (def.isTrap) {
+                if (tx === SPAWN.x && ty === SPAWN.y || tx === CORE.x && ty === CORE.y) {
+                    SFX.alert();
+                    showToast('侵入口・拠点には設置できません！');
+                    return;
+                }
+                if (state.grid[ty][tx] !== 0) {
+                    SFX.alert();
+                    showToast('空き通路にのみ設置できます！');
+                    return;
+                }
+                state.grid[ty][tx] = 3;
+            }
+
+            state.gold -= def.cost;
+            const tower = {
+                id: Math.random().toString(36).slice(2, 9),
+                x: tx,
+                y: ty,
+                type: def.id,
+                level: 1,
+                invested: def.cost,
+                angle: Math.PI,
+                cooldown: 0,
+                targetModeIdx: 0,
+                kills: 0
+            };
+            state.towers.push(tower);
+            SFX.build();
+            spawnParticles(tx * TILE + TILE / 2, ty * TILE + TILE / 2, def.accent, 10);
+
+            computeFlowField();
+            updateHUD();
+            updateInspector();
+        }
+
+        function getTowerStats(tower) {
+            const def = TOWER_DEFS[tower.type];
+            const lv = tower.level;
+            const upgradeCost = Math.floor(def.cost * (0.85 + lv * 0.65));
+            if (tower.type === 'wall') {
+                return { upgradeCost, maxLv: 1, dmg: 0, range: 0, fireRate: 0 };
+            }
+            if (tower.type === 'slow') {
+                const slowPct = Math.min(75, 55 + (lv - 1) * 5);
+                return {
+                    upgradeCost, maxLv: 5,
+                    dmg: Math.floor(4 * Math.pow(1.6, lv - 1)),
+                    slowFactor: 1 - slowPct / 100,
+                    slowPct,
+                    range: def.range,
+                    fireRate: 0
+                };
+            }
+            return {
+                upgradeCost,
+                maxLv: 5,
+                dmg: Math.floor(def.dmg * Math.pow(1.58, lv - 1)),
+                range: +(def.range + (lv - 1) * 0.28).toFixed(2),
+                fireRate: +(def.fireRate * (1 + (lv - 1) * 0.14)).toFixed(2),
+                chains: def.chains ? def.chains + Math.floor((lv - 1) / 2) : 0
+            };
+        }
+
+        function upgradeSelected() {
+            const t = state.towers.find(item => item.id === state.selectedTowerId);
+            if (!t) return;
+            const st = getTowerStats(t);
+            if (t.level >= st.maxLv) return;
+            if (state.gold < st.upgradeCost) {
+                SFX.alert();
+                showToast(`🪙 強化資源が足りません（${st.upgradeCost}G 必要）`);
+                return;
+            }
+            state.gold -= st.upgradeCost;
+            t.invested += st.upgradeCost;
+            t.level++;
+            SFX.upgrade();
+            spawnParticles(t.x * TILE + TILE / 2, t.y * TILE + TILE / 2, '#facc15', 16);
+            addFloatText(t.x * TILE + TILE / 2, t.y * TILE + 12, `Lv.${t.level} UP!`, '#fde047');
+            updateHUD();
+            updateInspector();
+        }
+
+        function sellSelected() {
+            const idx = state.towers.findIndex(item => item.id === state.selectedTowerId);
+            if (idx === -1) return;
+            const t = state.towers[idx];
+            const refund = Math.floor(t.invested * 0.7);
+            state.gold += refund;
+            state.grid[t.y][t.x] = 0;
+            state.towers.splice(idx, 1);
+            state.selectedTowerId = null;
+            SFX.sell();
+            addFloatText(t.x * TILE + TILE / 2, t.y * TILE + TILE / 2, `+${refund}G`, '#facc15');
+            computeFlowField();
+            updateHUD();
+            updateInspector();
+        }
+
+        function cycleTargetMode() {
+            const t = state.towers.find(item => item.id === state.selectedTowerId);
+            if (!t) return;
+            t.targetModeIdx = (t.targetModeIdx + 1) % TARGET_MODES.length;
+            SFX.tone(640, 'sine', 0.05, 0.08);
+            updateInspector();
+        }
+
+        function deselectPlaced() {
+            state.selectedTowerId = null;
+            updateInspector();
+        }
+
+        function updateInspector() {
+            const emptyEl = document.getElementById('inspector-empty');
+            const contentEl = document.getElementById('inspector-content');
+            const t = state.towers.find(item => item.id === state.selectedTowerId);
+
+            if (!t) {
+                emptyEl.classList.remove('hidden');
+                contentEl.classList.add('hidden');
+                return;
+            }
+
+            emptyEl.classList.add('hidden');
+            contentEl.classList.remove('hidden');
+
+            const def = TOWER_DEFS[t.type];
+            const st = getTowerStats(t);
+            const refund = Math.floor(t.invested * 0.7);
+
+            document.getElementById('ins-icon').innerText = def.icon;
+            document.getElementById('ins-name').innerText = def.name;
+            document.getElementById('ins-lv').innerText = t.type === 'wall' ? '堅牢壁' : `Lv.${t.level}/${st.maxLv}`;
+
+            const statsEl = document.getElementById('ins-stats');
+            if (t.type === 'wall') {
+                statsEl.innerText = '敵の進路を誘導してキルゾーンを作る基本壁。';
+            } else if (t.type === 'slow') {
+                statsEl.innerText = `移動速度 -${st.slowPct}% / 継続凍傷ダメ ${st.dmg}/秒`;
+            } else {
+                const extra = t.type === 'tesla' ? ` / 連鎖 ${st.chains}体` : (t.type === 'railgun' ? ' / 直線貫通' : '');
+                statsEl.innerText = `威力 ${st.dmg} / 連射 ${st.fireRate}/s / 射程 ${st.range}${extra} (撃破 ${t.kills})`;
+            }
+
+            const targetRow = document.getElementById('ins-target-row');
+            if (def.isCombat) {
+                targetRow.classList.remove('hidden');
+                document.getElementById('btn-target-mode').innerText = TARGET_MODES[t.targetModeIdx].label;
+            } else {
+                targetRow.classList.add('hidden');
+            }
+
+            const upBtn = document.getElementById('btn-upgrade');
+            if (t.type === 'wall' || t.level >= st.maxLv) {
+                upBtn.disabled = true;
+                upBtn.innerText = t.type === 'wall' ? '強化不可' : '★ MAX LEVEL';
+            } else {
+                upBtn.disabled = state.gold < st.upgradeCost;
+                upBtn.innerText = `⬆ Lv.${t.level + 1} 強化 (${st.upgradeCost}G)`;
+            }
+
+            document.getElementById('btn-sell').innerText = `💰 撤去 (+${refund}G)`;
+        }
+
+        /* =====================================================================
+         * 6. ウェーブ生成＆戦闘ループ
+         * ===================================================================== */
+        function buildWaveQueue(waveNum) {
+            const q = [];
+            const hpScale = Math.pow(1.25, waveNum - 1) * (waveNum > 20 ? Math.pow(1.15, waveNum - 20) : 1);
+            const pushGroup = (typeKey, count, interval) => {
+                for (let i = 0; i < count; i++) {
+                    q.push({ typeKey, hpScale, delay: interval });
+                }
+            };
+
+            if (waveNum === 1) {
+                pushGroup('grunt', 10, 0.72);
+            } else if (waveNum === 2) {
+                pushGroup('grunt', 8, 0.65);
+                pushGroup('runner', 6, 0.55);
+            } else if (waveNum === 3) {
+                pushGroup('swarm', 20, 0.28);
+                pushGroup('tank', 3, 1.0);
+            } else if (waveNum === 4) {
+                pushGroup('grunt', 10, 0.45);
+                pushGroup('regen', 6, 0.65);
+                pushGroup('runner', 8, 0.4);
+            } else if (waveNum % 5 === 0) {
+                // ボスウェーブ！前座＋ボス＋取り巻き
+                pushGroup('swarm', 14 + waveNum, 0.22);
+                const bossCount = Math.max(1, Math.floor(waveNum / 10) + (waveNum >= 20 ? 1 : 0));
+                pushGroup('boss', bossCount, 2.2);
+                pushGroup('tank', Math.min(12, 3 + Math.floor(waveNum / 2)), 0.75);
+                pushGroup('runner', 10, 0.35);
+            } else {
+                // 通常インフレウェーブ（大群ラッシュ重視！）
+                const totalBase = 14 + waveNum * 2;
+                pushGroup('swarm', Math.floor(totalBase * 0.45), 0.2);
+                pushGroup('tank', Math.floor(totalBase * 0.16), 0.75);
+                pushGroup('regen', Math.floor(totalBase * 0.18), 0.55);
+                pushGroup('runner', Math.floor(totalBase * 0.25), 0.32);
+            }
+            return q;
+        }
+
+        function startNextWave() {
+            if (state.waveActive || state.gameOver) return;
+            SFX.init();
+            SFX.waveStart();
+
+            state.wave++;
+            state.waveActive = true;
+            state.spawnQueue = buildWaveQueue(state.wave);
+            state.spawnTimer = 0.1;
+
+            updateHUD();
+        }
+
+        function spawnEnemyFromEntry(entry) {
+            const base = ENEMY_TYPES[entry.typeKey];
+            const maxHp = Math.floor(base.hp * entry.hpScale);
+            state.enemies.push({
+                id: Math.random().toString(36).slice(2, 9),
+                typeKey: entry.typeKey,
+                name: base.name,
+                x: SPAWN.x * TILE + TILE * 0.2,
+                y: SPAWN.y * TILE + TILE / 2 + (Math.random() - 0.5) * 14,
+                hp: maxHp,
+                maxHp: maxHp,
+                speed: base.speed,
+                armor: base.armor + Math.floor(state.wave / 6),
+                regen: base.regen ? base.regen * (1 + state.wave * 0.12) : 0,
+                gold: Math.max(2, Math.floor(base.gold * (1 + state.wave * 0.05))),
+                radius: base.radius,
+                color: base.color,
+                isBoss: !!base.isBoss,
+                slowTimer: 0,
+                slowFactor: 1.0,
+                hitFlash: 0
+            });
+        }
+
+        function updateGame(dt) {
+            if (state.gameOver) return;
+            const step = dt * state.speedMult;
+
+            if (state.shakeTimer > 0) state.shakeTimer = Math.max(0, state.shakeTimer - dt);
+
+            // 1. 敵スポーン
+            if (state.waveActive && state.spawnQueue.length > 0) {
+                state.spawnTimer -= step;
+                while (state.spawnTimer <= 0 && state.spawnQueue.length > 0) {
+                    const next = state.spawnQueue.shift();
+                    spawnEnemyFromEntry(next);
+                    state.spawnTimer += next.delay;
+                }
+            }
+
+            // 2. クライオ床（罠）処理
+            const traps = state.towers.filter(t => t.type === 'slow');
+            for (const e of state.enemies) {
+                if (e.regen > 0 && e.hp < e.maxHp) {
+                    e.hp = Math.min(e.maxHp, e.hp + e.regen * step);
+                }
+                if (e.hitFlash > 0) e.hitFlash = Math.max(0, e.hitFlash - dt * 5);
+                if (e.slowTimer > 0) {
+                    e.slowTimer -= step;
+                    if (e.slowTimer <= 0) e.slowFactor = 1.0;
+                }
+                const gx = Math.floor(e.x / TILE);
+                const gy = Math.floor(e.y / TILE);
+                for (const tr of traps) {
+                    if (tr.x === gx && tr.y === gy) {
+                        const st = getTowerStats(tr);
+                        e.slowFactor = Math.min(e.slowFactor, st.slowFactor);
+                        e.slowTimer = 0.6;
+                        e.hp -= st.dmg * step;
+                    }
+                }
+            }
+
+            // 3. 敵の移動（Flow Field に沿って拠点へ）
+            for (let i = state.enemies.length - 1; i >= 0; i--) {
+                const e = state.enemies[i];
+                if (e.hp <= 0) {
+                    handleEnemyDeath(e, null);
+                    state.enemies.splice(i, 1);
+                    continue;
+                }
+
+                const gx = Math.max(0, Math.min(COLS - 1, Math.floor(e.x / TILE)));
+                const gy = Math.max(0, Math.min(ROWS - 1, Math.floor(e.y / TILE)));
+
+                // 拠点到達判定
+                const coreCx = CORE.x * TILE + TILE / 2;
+                const coreCy = CORE.y * TILE + TILE / 2;
+                if (Math.hypot(coreCx - e.x, coreCy - e.y) < TILE * 0.42) {
+                    const dmgLife = e.isBoss ? 5 : 1;
+                    state.life = Math.max(0, state.life - dmgLife);
+                    state.shakeTimer = 0.35;
+                    SFX.alert();
+                    spawnParticles(coreCx, coreCy, '#ef4444', 18);
+                    addFloatText(coreCx - 20, coreCy - 10, `-${dmgLife} ❤️`, '#ff4466');
+                    state.enemies.splice(i, 1);
+                    updateHUD();
+                    if (state.life <= 0) {
+                        triggerResult(false);
+                        return;
+                    }
+                    continue;
+                }
+
+                // Flow Fieldから次に向かう最適隣接マスを取得
+                let bestX = gx, bestY = gy;
+                let bestD = state.distMap[gy][gx];
+                const dirs = [[1, 0], [0, 1], [0, -1], [-1, 0]];
+                for (const [dx, dy] of dirs) {
+                    const nx = gx + dx, ny = gy + dy;
+                    if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) continue;
+                    if (state.distMap[ny][nx] < bestD) {
+                        bestD = state.distMap[ny][nx];
+                        bestX = nx;
+                        bestY = ny;
+                    }
+                }
+
+                const targetX = bestX * TILE + TILE / 2;
+                const targetY = bestY * TILE + TILE / 2;
+                const dx = targetX - e.x;
+                const dy = targetY - e.y;
+                const dist = Math.hypot(dx, dy) || 1;
+                const moveSpd = e.speed * e.slowFactor * step;
+                e.x += (dx / dist) * Math.min(moveSpd, dist);
+                e.y += (dy / dist) * Math.min(moveSpd, dist);
+            }
+
+            // 4. タレット射撃ロジック
+            for (const t of state.towers) {
+                const def = TOWER_DEFS[t.type];
+                if (!def.isCombat) continue;
+                if (t.cooldown > 0) t.cooldown -= step;
+                if (t.cooldown > 0) continue;
+
+                const st = getTowerStats(t);
+                const tx = t.x * TILE + TILE / 2;
+                const ty = t.y * TILE + TILE / 2;
+                const rangePx = st.range * TILE;
+
+                const target = pickTarget(t, tx, ty, rangePx);
+                if (!target) continue;
+
+                t.angle = Math.atan2(target.y - ty, target.x - tx);
+                t.cooldown = 1 / st.fireRate;
+                fireTower(t, st, tx, ty, target);
+            }
+
+            // 5. 弾丸（ガトリング）更新
+            for (let i = state.projectiles.length - 1; i >= 0; i--) {
+                const p = state.projectiles[i];
+                const target = state.enemies.find(e => e.id === p.targetId);
+                if (target) {
+                    p.tx = target.x;
+                    p.ty = target.y;
+                }
+                const dx = p.tx - p.x;
+                const dy = p.ty - p.y;
+                const dist = Math.hypot(dx, dy);
+                const move = p.speed * step;
+                if (dist <= move + 6) {
+                    if (target && target.hp > 0) {
+                        applyDamage(target, p.dmg, false, p.tower);
+                    }
+                    spawnParticles(p.tx, p.ty, p.color, 4);
+                    state.projectiles.splice(i, 1);
+                } else {
+                    p.x += (dx / dist) * move;
+                    p.y += (dy / dist) * move;
+                }
+            }
+
+            // 6. ビーム・パーティクル・フローティング文字の寿命管理
+            for (let i = state.beams.length - 1; i >= 0; i--) {
+                state.beams[i].life -= dt;
+                if (state.beams[i].life <= 0) state.beams.splice(i, 1);
+            }
+            for (let i = state.particles.length - 1; i >= 0; i--) {
+                const pt = state.particles[i];
+                pt.x += pt.vx * dt;
+                pt.y += pt.vy * dt;
+                pt.life -= dt;
+                if (pt.life <= 0) state.particles.splice(i, 1);
+            }
+            for (let i = state.floatTexts.length - 1; i >= 0; i--) {
+                const ft = state.floatTexts[i];
+                ft.y -= 28 * dt;
+                ft.life -= dt;
+                if (ft.life <= 0) state.floatTexts.splice(i, 1);
+            }
+
+            // 7. 死亡敵の掃除
+            for (let i = state.enemies.length - 1; i >= 0; i--) {
+                if (state.enemies[i].hp <= 0) {
+                    handleEnemyDeath(state.enemies[i], null);
+                    state.enemies.splice(i, 1);
+                }
+            }
+
+            // 8. ウェーブ終了判定
+            if (state.waveActive && state.spawnQueue.length === 0 && state.enemies.length === 0) {
+                state.waveActive = false;
+                const bonus = 25 + state.wave * 8;
+                state.gold += bonus;
+                SFX.upgrade();
+                showToast(`✅ WAVE ${state.wave} 殲滅完了！ボーナス +${bonus}G`, 'amber');
+                updateHUD();
+                updateInspector();
+
+                if (state.wave === state.maxWaves && !state.endless && !state.victoryShown) {
+                    state.victoryShown = true;
+                    triggerResult(true);
+                }
+            }
+        }
+
+        function pickTarget(tower, tx, ty, rangePx) {
+            const mode = TARGET_MODES[tower.targetModeIdx].id;
+            let best = null;
+            let bestScore = -Infinity;
+
+            for (const e of state.enemies) {
+                if (e.hp <= 0) continue;
+                const d = Math.hypot(e.x - tx, e.y - ty);
+                if (d > rangePx + e.radius) continue;
+
+                let score = 0;
+                if (mode === 'first') {
+                    const gx = Math.max(0, Math.min(COLS - 1, Math.floor(e.x / TILE)));
+                    const gy = Math.max(0, Math.min(ROWS - 1, Math.floor(e.y / TILE)));
+                    // 拠点までの残り距離が小さいほど高スコア
+                    score = -(state.distMap[gy][gx] * TILE + Math.hypot(e.x - (gx * TILE + TILE / 2), e.y - (gy * TILE + TILE / 2)));
+                } else if (mode === 'strong') {
+                    score = e.hp;
+                } else {
+                    score = -d;
+                }
+                if (score > bestScore) {
+                    bestScore = score;
+                    best = e;
+                }
+            }
+            return best;
+        }
+
+        function fireTower(tower, st, tx, ty, target) {
+            SFX.shoot(tower.type);
+
+            if (tower.type === 'gatling') {
+                state.projectiles.push({
+                    x: tx + Math.cos(tower.angle) * 14,
+                    y: ty + Math.sin(tower.angle) * 14,
+                    tx: target.x,
+                    ty: target.y,
+                    targetId: target.id,
+                    speed: TOWER_DEFS.gatling.projSpeed,
+                    dmg: st.dmg,
+                    color: '#fde047',
+                    tower
+                });
+            } else if (tower.type === 'flamer') {
+                // 扇形（コーン）内の全敵に同時貫通焼き払い！
+                const rangePx = st.range * TILE;
+                const cone = TOWER_DEFS.flamer.coneAngle;
+                state.beams.push({
+                    kind: 'cone', x: tx, y: ty, angle: tower.angle, range: rangePx, cone,
+                    color: 'rgba(251, 146, 60, 0.55)', life: 0.16, maxLife: 0.16
+                });
+                for (const e of state.enemies) {
+                    if (e.hp <= 0) continue;
+                    const dx = e.x - tx, dy = e.y - ty;
+                    const d = Math.hypot(dx, dy);
+                    if (d > rangePx + e.radius) continue;
+                    let diff = Math.abs(Math.atan2(dy, dx) - tower.angle);
+                    if (diff > Math.PI) diff = Math.PI * 2 - diff;
+                    if (diff <= cone) {
+                        applyDamage(e, st.dmg, false, tower);
+                        spawnParticles(e.x, e.y, '#fb923c', 3);
+                    }
+                }
+            } else if (tower.type === 'tesla') {
+                // チェインライトニング（装甲無視）
+                const hitSet = new Set();
+                let curX = tx, curY = ty;
+                let curTarget = target;
+                const points = [{ x: curX, y: curY }];
+
+                for (let c = 0; c < st.chains && curTarget; c++) {
+                    hitSet.add(curTarget.id);
+                    points.push({ x: curTarget.x, y: curTarget.y });
+                    const chainDmg = Math.floor(st.dmg * Math.pow(0.88, c));
+                    applyDamage(curTarget, chainDmg, true, tower);
+                    spawnParticles(curTarget.x, curTarget.y, '#38bdf8', 5);
+
+                    curX = curTarget.x;
+                    curY = curTarget.y;
+                    // 近くの未ヒット敵へ連鎖
+                    let nextT = null;
+                    let bestD = TILE * 2.7;
+                    for (const e of state.enemies) {
+                        if (e.hp <= 0 || hitSet.has(e.id)) continue;
+                        const d = Math.hypot(e.x - curX, e.y - curY);
+                        if (d < bestD) {
+                            bestD = d;
+                            nextT = e;
+                        }
+                    }
+                    curTarget = nextT;
+                }
+                state.beams.push({ kind: 'chain', points, color: '#38bdf8', life: 0.2, maxLife: 0.2 });
+            } else if (tower.type === 'railgun') {
+                // 一直線貫通レールガン！射程の端まで全貫通
+                const rangePx = st.range * TILE;
+                const ex = tx + Math.cos(tower.angle) * rangePx;
+                const ey = ty + Math.sin(tower.angle) * rangePx;
+                state.beams.push({
+                    kind: 'rail', x1: tx, y1: ty, x2: ex, y2: ey,
+                    color: '#22d3ee', core: '#ffffff', life: 0.32, maxLife: 0.32
+                });
+                state.shakeTimer = Math.max(state.shakeTimer, 0.14);
+
+                // 線分と各敵の距離チェック（全貫通＆装甲無視）
+                let hitCount = 0;
+                for (const e of state.enemies) {
+                    if (e.hp <= 0) continue;
+                    const distToLine = pointToSegmentDist(e.x, e.y, tx, ty, ex, ey);
+                    if (distToLine <= e.radius + 10) {
+                        applyDamage(e, st.dmg, true, tower);
+                        spawnParticles(e.x, e.y, '#22d3ee', 8);
+                        hitCount++;
+                    }
+                }
+                if (hitCount >= 3) {
+                    addFloatText(tx, ty - 14, `${hitCount}体貫通!!`, '#22d3ee');
+                }
+            }
+        }
+
+        function applyDamage(enemy, rawDmg, ignoreArmor, tower) {
+            const actual = ignoreArmor ? rawDmg : Math.max(2, rawDmg - enemy.armor);
+            enemy.hp -= actual;
+            enemy.hitFlash = 1;
+            if (enemy.hp <= 0 && !enemy._counted) {
+                enemy._counted = true;
+                if (tower) tower.kills++;
+                handleEnemyDeath(enemy, tower);
+            }
+        }
+
+        function handleEnemyDeath(enemy, tower) {
+            if (enemy._rewarded) return;
+            enemy._rewarded = true;
+            state.gold += enemy.gold;
+            state.kills++;
+            SFX.kill(enemy.isBoss);
+            spawnParticles(enemy.x, enemy.y, enemy.color, enemy.isBoss ? 28 : 10);
+            if (enemy.isBoss) {
+                state.shakeTimer = 0.35;
+                addFloatText(enemy.x, enemy.y - 12, `BOSS撃破 +${enemy.gold}G!`, '#fde047');
+            } else {
+                addFloatText(enemy.x, enemy.y - 8, `+${enemy.gold}G`, '#facc15');
+            }
+            updateHUD();
+            if (state.selectedTowerId && tower && tower.id === state.selectedTowerId) {
+                updateInspector();
+            }
+        }
+
+        function pointToSegmentDist(px, py, x1, y1, x2, y2) {
+            const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+            if (l2 === 0) return Math.hypot(px - x1, py - y1);
+            let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+            t = Math.max(0, Math.min(1, t));
+            return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+        }
+
+        function spawnParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                const a = Math.random() * Math.PI * 2;
+                const spd = 40 + Math.random() * 140;
+                state.particles.push({
+                    x, y,
+                    vx: Math.cos(a) * spd,
+                    vy: Math.sin(a) * spd,
+                    color,
+                    size: 2 + Math.random() * 3.5,
+                    life: 0.25 + Math.random() * 0.25
+                });
+            }
+        }
+
+        function addFloatText(x, y, text, color) {
+            state.floatTexts.push({ x, y, text, color, life: 0.75 });
+        }
+
+        /* =====================================================================
+         * 7. Canvas描画エンジン
+         * ===================================================================== */
+        function renderGame(now) {
+            ctx.save();
+            if (state.shakeTimer > 0) {
+                const mag = state.shakeTimer * 18;
+                ctx.translate((Math.random() - 0.5) * mag, (Math.random() - 0.5) * mag);
+            }
+
+            // 背景クリア
+            ctx.fillStyle = '#0d121f';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // グリッド＆地形描画
+            for (let y = 0; y < ROWS; y++) {
+                for (let x = 0; x < COLS; x++) {
+                    const px = x * TILE;
+                    const py = y * TILE;
+                    const cell = state.grid[y][x];
+
+                    // ベースタイル
+                    ctx.fillStyle = (x + y) % 2 === 0 ? '#111726' : '#141b2c';
+                    ctx.fillRect(px, py, TILE, TILE);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+                    ctx.strokeRect(px, py, TILE, TILE);
+
+                    // 天然の岩山（背後は山！）
+                    if (cell === 1) {
+                        ctx.fillStyle = '#1e2433';
+                        ctx.fillRect(px + 2, py + 2, TILE - 4, TILE - 4);
+                        ctx.fillStyle = '#2d3748';
+                        ctx.beginPath();
+                        ctx.moveTo(px + 6, py + TILE - 8);
+                        ctx.lineTo(px + TILE * 0.45, py + 10);
+                        ctx.lineTo(px + TILE - 6, py + TILE - 8);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.fillStyle = '#4a5568';
+                        ctx.beginPath();
+                        ctx.moveTo(px + TILE * 0.45, py + 10);
+                        ctx.lineTo(px + TILE * 0.62, py + 24);
+                        ctx.lineTo(px + TILE * 0.34, py + 22);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                }
+            }
+
+            // スポーン地点（左端）
+            const sx = SPAWN.x * TILE, sy = SPAWN.y * TILE;
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.22)';
+            ctx.fillRect(sx + 2, sy + 2, TILE - 4, TILE - 4);
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(sx + 3, sy + 3, TILE - 6, TILE - 6);
+            ctx.fillStyle = '#fca5a5';
+            ctx.font = '900 11px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('SPAWN', sx + TILE / 2, sy + TILE / 2 + 4);
+
+            // 要塞コア（右端・山に守られた拠点）
+            const cx = CORE.x * TILE, cy = CORE.y * TILE;
+            ctx.fillStyle = 'rgba(6, 182, 212, 0.22)';
+            ctx.fillRect(cx + 2, cy + 2, TILE - 4, TILE - 4);
+            ctx.strokeStyle = '#06b6d4';
+            ctx.lineWidth = 2.5;
+            ctx.strokeRect(cx + 3, cy + 3, TILE - 6, TILE - 6);
+            ctx.fillStyle = '#67e8f9';
+            ctx.font = '900 12px Inter, sans-serif';
+            ctx.fillText('BASE', cx + TILE / 2, cy + TILE / 2 + 4);
+
+            // 敵の最短進軍ルート（キルゾーン予測ライン）を点線アニメーションで描画
+            if (state.previewPath.length > 1) {
+                ctx.save();
+                ctx.beginPath();
+                state.previewPath.forEach((p, idx) => {
+                    const px = p.x * TILE + TILE / 2;
+                    const py = p.y * TILE + TILE / 2;
+                    if (idx === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                });
+                ctx.strokeStyle = state.waveActive ? 'rgba(245, 158, 11, 0.24)' : 'rgba(245, 158, 11, 0.62)';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([8, 8]);
+                ctx.lineDashOffset = -(now / 35) % 16;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // ホバー中の設置プレビュー＆射程表示
+            if (state.hoverTile && state.selectedBuild) {
+                const { x, y } = state.hoverTile;
+                const def = TOWER_DEFS[state.selectedBuild];
+                const ok = def.isBlocking
+                    ? (state.grid[y][x] === 0 && !(x === SPAWN.x && y === SPAWN.y) && !(x === CORE.x && y === CORE.y))
+                    : (state.grid[y][x] === 0 && !(x === SPAWN.x && y === SPAWN.y) && !(x === CORE.x && y === CORE.y));
+
+                ctx.fillStyle = ok ? 'rgba(245, 158, 11, 0.22)' : 'rgba(239, 68, 68, 0.28)';
+                ctx.fillRect(x * TILE + 2, y * TILE + 2, TILE - 4, TILE - 4);
+
+                if (ok && def.range > 0) {
+                    ctx.beginPath();
+                    ctx.arc(x * TILE + TILE / 2, y * TILE + TILE / 2, def.range * TILE, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(6, 182, 212, 0.09)';
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(6, 182, 212, 0.5)';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+            }
+
+            // クライオ床（罠）を先に描画（敵の下敷き）
+            for (const t of state.towers) {
+                if (t.type !== 'slow') continue;
+                const px = t.x * TILE, py = t.y * TILE;
+                ctx.fillStyle = 'rgba(14, 165, 233, 0.28)';
+                ctx.fillRect(px + 3, py + 3, TILE - 6, TILE - 6);
+                ctx.strokeStyle = t.id === state.selectedTowerId ? '#fde047' : '#38bdf8';
+                ctx.lineWidth = t.id === state.selectedTowerId ? 2.5 : 1.5;
+                ctx.strokeRect(px + 4, py + 4, TILE - 8, TILE - 8);
+                ctx.font = '18px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('❄️', px + TILE / 2, py + TILE / 2 + 6);
+                if (t.level > 1) drawLevelDots(px, py, t.level);
+            }
+
+            // 選択中タレットの射程円
+            const selTower = state.towers.find(t => t.id === state.selectedTowerId);
+            if (selTower) {
+                const st = getTowerStats(selTower);
+                if (st.range > 0) {
+                    ctx.beginPath();
+                    ctx.arc(selTower.x * TILE + TILE / 2, selTower.y * TILE + TILE / 2, st.range * TILE, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(245, 158, 11, 0.1)';
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(245, 158, 11, 0.65)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
+
+            // 壁・タレット描画
+            for (const t of state.towers) {
+                if (t.type === 'slow') continue;
+                const def = TOWER_DEFS[t.type];
+                const px = t.x * TILE, py = t.y * TILE;
+                const mx = px + TILE / 2, my = py + TILE / 2;
+
+                // 土台
+                ctx.fillStyle = t.type === 'wall' ? '#334155' : '#1b2234';
+                ctx.fillRect(px + 4, py + 4, TILE - 8, TILE - 8);
+                ctx.strokeStyle = t.id === state.selectedTowerId ? '#fde047' : def.color;
+                ctx.lineWidth = t.id === state.selectedTowerId ? 3 : 2;
+                ctx.strokeRect(px + 4, py + 4, TILE - 8, TILE - 8);
+
+                if (t.type === 'wall') {
+                    // 強化ブロック模様
+                    ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(px + 10, py + 10); ctx.lineTo(px + TILE - 10, py + TILE - 10);
+                    ctx.moveTo(px + TILE - 10, py + 10); ctx.lineTo(px + 10, py + TILE - 10);
+                    ctx.stroke();
+                } else {
+                    // 砲塔回転描画
+                    ctx.save();
+                    ctx.translate(mx, my);
+                    ctx.rotate(t.angle);
+                    ctx.fillStyle = def.color;
+                    if (t.type === 'gatling') {
+                        ctx.fillRect(0, -5, 22, 3.5);
+                        ctx.fillRect(0, 1.5, 22, 3.5);
+                    } else if (t.type === 'flamer') {
+                        ctx.fillRect(0, -6, 18, 12);
+                        ctx.fillStyle = '#fb923c';
+                        ctx.fillRect(16, -8, 5, 16);
+                    } else if (t.type === 'tesla') {
+                        ctx.beginPath();
+                        ctx.arc(0, 0, 13, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#38bdf8';
+                        ctx.beginPath();
+                        ctx.arc(0, 0, 6, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (t.type === 'railgun') {
+                        ctx.fillRect(-4, -6, 28, 4);
+                        ctx.fillRect(-4, 2, 28, 4);
+                        ctx.fillStyle = '#22d3ee';
+                        ctx.fillRect(2, -1.5, 24, 3);
+                    }
+                    // 中央コア
+                    if (t.type !== 'tesla') {
+                        ctx.fillStyle = def.accent;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, 10, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+
+                    drawLevelDots(px, py, t.level);
+                }
+            }
+
+            // 敵描画
+            for (const e of state.enemies) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+                ctx.fillStyle = e.hitFlash > 0.2 ? '#ffffff' : (e.slowTimer > 0 ? '#38bdf8' : e.color);
+                ctx.fill();
+                ctx.strokeStyle = e.isBoss ? '#fde047' : '#090b10';
+                ctx.lineWidth = e.isBoss ? 3 : 2;
+                ctx.stroke();
+
+                // HPバー
+                const bw = e.radius * 2.4;
+                const bh = e.isBoss ? 6 : 4;
+                const bx = e.x - bw / 2;
+                const by = e.y - e.radius - 10;
+                ctx.fillStyle = 'rgba(0,0,0,0.75)';
+                ctx.fillRect(bx, by, bw, bh);
+                const ratio = Math.max(0, e.hp / e.maxHp);
+                ctx.fillStyle = ratio > 0.5 ? '#22c55e' : (ratio > 0.25 ? '#f59e0b' : '#ef4444');
+                ctx.fillRect(bx, by, bw * ratio, bh);
+                ctx.restore();
+            }
+
+            // ビーム＆火炎エフェクト描画
+            for (const b of state.beams) {
+                const alpha = Math.max(0, b.life / b.maxLife);
+                ctx.save();
+                if (b.kind === 'cone') {
+                    ctx.globalAlpha = alpha;
+                    ctx.beginPath();
+                    ctx.moveTo(b.x, b.y);
+                    ctx.arc(b.x, b.y, b.range, b.angle - b.cone, b.angle + b.cone);
+                    ctx.closePath();
+                    const grad = ctx.createRadialGradient(b.x, b.y, 10, b.x, b.y, b.range);
+                    grad.addColorStop(0, 'rgba(253, 224, 71, 0.85)');
+                    grad.addColorStop(0.5, 'rgba(249, 115, 22, 0.55)');
+                    grad.addColorStop(1, 'rgba(239, 68, 68, 0.05)');
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+                } else if (b.kind === 'chain') {
+                    ctx.globalAlpha = alpha;
+                    ctx.strokeStyle = b.color;
+                    ctx.lineWidth = 3;
+                    ctx.shadowColor = '#38bdf8';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    b.points.forEach((pt, idx) => {
+                        if (idx === 0) ctx.moveTo(pt.x, pt.y);
+                        else {
+                            const prev = b.points[idx - 1];
+                            const mx = (prev.x + pt.x) / 2 + (Math.random() - 0.5) * 14;
+                            const my = (prev.y + pt.y) / 2 + (Math.random() - 0.5) * 14;
+                            ctx.lineTo(mx, my);
+                            ctx.lineTo(pt.x, pt.y);
+                        }
+                    });
+                    ctx.stroke();
+                } else if (b.kind === 'rail') {
+                    ctx.globalAlpha = alpha;
+                    ctx.strokeStyle = b.color;
+                    ctx.lineWidth = 10 * alpha;
+                    ctx.shadowColor = '#22d3ee';
+                    ctx.shadowBlur = 16;
+                    ctx.beginPath();
+                    ctx.moveTo(b.x1, b.y1);
+                    ctx.lineTo(b.x2, b.y2);
+                    ctx.stroke();
+                    ctx.strokeStyle = b.core;
+                    ctx.lineWidth = 3.5 * alpha;
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            // ガトリング弾丸
+            for (const p of state.projectiles) {
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3.2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // パーティクル
+            for (const pt of state.particles) {
+                ctx.globalAlpha = Math.max(0, pt.life * 2);
+                ctx.fillStyle = pt.color;
+                ctx.fillRect(pt.x - pt.size / 2, pt.y - pt.size / 2, pt.size, pt.size);
+            }
+            ctx.globalAlpha = 1;
+
+            // フローティング文字
+            for (const ft of state.floatTexts) {
+                ctx.globalAlpha = Math.max(0, ft.life / 0.75);
+                ctx.font = '900 13px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = ft.color;
+                ctx.fillText(ft.text, ft.x, ft.y);
+            }
+            ctx.globalAlpha = 1;
+
+            ctx.restore();
+        }
+
+        function drawLevelDots(px, py, lv) {
+            for (let i = 0; i < lv; i++) {
+                ctx.fillStyle = '#fde047';
+                ctx.fillRect(px + 7 + i * 8, py + TILE - 10, 5, 4);
+            }
+        }
+
+        function gameLoop(now) {
+            const dt = Math.min(0.05, (now - lastFrameTime) / 1000);
+            lastFrameTime = now;
+            updateGame(dt);
+            renderGame(now);
+            animId = requestAnimationFrame(gameLoop);
+        }
+
+        /* =====================================================================
+         * 8. HUD・操作補助・イベント登録
+         * ===================================================================== */
+        function updateHUD() {
+            document.getElementById('ui-wave').innerText = state.wave;
+            document.getElementById('ui-wave-max').innerText = state.endless ? ' (∞)' : `/${state.maxWaves}`;
+            document.getElementById('ui-life').innerText = state.life;
+            document.getElementById('ui-gold').innerText = state.gold;
+            document.getElementById('ui-kills').innerText = state.kills;
+            document.getElementById('ui-path-len').innerText = state.previewPath.length;
+
+            const btn = document.getElementById('btn-start-wave');
+            const pill = document.getElementById('wave-preview-pill');
+            if (state.waveActive) {
+                btn.disabled = true;
+                btn.classList.remove('wave-ready-pulse');
+                btn.className = 'px-3.5 sm:px-5 py-1.5 rounded-xl bg-gray-800 border border-gray-600 text-gray-400 font-black text-xs sm:text-sm cursor-not-allowed';
+                btn.innerText = `⚔️ WAVE ${state.wave} 交戦中`;
+                pill.innerText = `🔥 交戦中：残り ${state.spawnQueue.length + state.enemies.length} 体`;
+            } else {
+                const nextW = state.wave + 1;
+                btn.disabled = false;
+                btn.className = 'px-3.5 sm:px-5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-black font-black text-xs sm:text-sm shadow-lg transition active:scale-95 wave-ready-pulse';
+                btn.innerText = nextW % 5 === 0 ? `💀 BOSS WAVE ${nextW} 開始` : `▶ WAVE ${nextW} 開始`;
+                pill.innerText = nextW % 5 === 0
+                    ? `⚠️ 次は巨大ボス襲来（Wave ${nextW}）！キルゾーンを強化しろ！`
+                    : `🛠️ 準備フェーズ（現在経路 ${state.previewPath.length}マス）：壁と兵器を配置しよう`;
+            }
+        }
+
+        function cycleSpeed() {
+            const speeds = [1, 2, 3];
+            const idx = (speeds.indexOf(state.speedMult) + 1) % speeds.length;
+            state.speedMult = speeds[idx];
+            document.getElementById('btn-speed').innerText = `⏩ ${state.speedMult}x`;
+            SFX.tone(520 + idx * 120, 'sine', 0.06, 0.08);
+        }
+
+        function triggerResult(isVictory) {
+            if (!isVictory) state.gameOver = true;
+            const modal = document.getElementById('result-modal');
+            modal.classList.remove('hidden');
+
+            const badge = document.getElementById('res-badge');
+            const title = document.getElementById('res-title');
+            const desc = document.getElementById('res-desc');
+            const endlessBtn = document.getElementById('btn-continue-endless');
+
+            if (isVictory) {
+                badge.innerText = 'FORTRESS SECURED';
+                badge.className = 'inline-block px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-black tracking-widest mb-3';
+                title.innerText = '🎉 全20WAVE・完全防衛！';
+                title.className = 'text-3xl font-black text-amber-300 neon-amber mb-2';
+                desc.innerText = 'お前の構築した極悪キルゾーンを突破できた敵はいなかった！';
+                endlessBtn.classList.remove('hidden');
+            } else {
+                badge.innerText = 'DEFENSE BREACHED';
+                badge.className = 'inline-block px-3.5 py-1 rounded-full bg-rose-500/20 text-rose-300 text-xs font-black tracking-widest mb-3';
+                title.innerText = '💀 要塞陥落……';
+                title.className = 'text-3xl font-black text-rose-500 mb-2';
+                desc.innerText = '壁でルートをさらに長く曲げ、クライオ床と火炎放射を重ねてみよう！';
+                endlessBtn.classList.add('hidden');
+            }
+
+            document.getElementById('res-wave').innerText = `Wave ${state.wave}`;
+            document.getElementById('res-kills').innerText = `${state.kills} 体`;
+            document.getElementById('res-path').innerText = `${state.bestPathLen} マス`;
+        }
+
+        function toggleHelp(show) {
+            const el = document.getElementById('help-modal');
+            if (show) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+
+        let toastTimer = null;
+        function showToast(msg, color = 'rose') {
+            const box = document.getElementById('toast-box');
+            const txt = document.getElementById('toast-msg');
+            txt.innerText = msg;
+            if (color === 'amber') {
+                txt.className = 'px-4 py-2 rounded-full bg-amber-950/95 border border-amber-400 text-amber-200 text-xs sm:text-sm font-bold shadow-lg whitespace-nowrap';
+            } else if (color === 'cyan') {
+                txt.className = 'px-4 py-2 rounded-full bg-cyan-950/95 border border-cyan-400 text-cyan-200 text-xs sm:text-sm font-bold shadow-lg whitespace-nowrap';
+            } else {
+                txt.className = 'px-4 py-2 rounded-full bg-rose-950/95 border border-rose-400 text-rose-100 text-xs sm:text-sm font-bold shadow-lg whitespace-nowrap';
+            }
+            box.classList.remove('opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => box.classList.add('opacity-0'), 2200);
+        }
+
+        function getTileFromPointer(evt) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const cx = (evt.clientX - rect.left) * scaleX;
+            const cy = (evt.clientY - rect.top) * scaleY;
+            return { x: Math.floor(cx / TILE), y: Math.floor(cy / TILE) };
+        }
+
+        window.onload = () => {
+            canvas = document.getElementById('game-canvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = COLS * TILE;
+            canvas.height = ROWS * TILE;
+
+            canvas.addEventListener('pointermove', (e) => {
+                if (!state) return;
+                const t = getTileFromPointer(e);
+                if (t.x >= 0 && t.x < COLS && t.y >= 0 && t.y < ROWS) {
+                    state.hoverTile = t;
+                } else {
+                    state.hoverTile = null;
+                }
+            });
+
+            canvas.addEventListener('pointerleave', () => {
+                if (state) state.hoverTile = null;
+            });
+
+            canvas.addEventListener('pointerdown', (e) => {
+                if (!state) return;
+                const t = getTileFromPointer(e);
+                handleTileClick(t.x, t.y);
+            });
+        };
+    </script>
+</body>
+</html>
