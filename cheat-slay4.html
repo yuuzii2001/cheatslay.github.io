@@ -1,0 +1,2834 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHEAT & SLAY ver 2.4 〜イカサマ上等ダイスローグ〜</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Noto Sans JP -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0b0b12;
+            --gold: #ffd700;
+            --cyan: #00f3ff;
+            --crimson: #ff2a55;
+            --purple: #b829ff;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(184, 41, 255, 0.14) 0%, transparent 42%),
+                radial-gradient(circle at 85% 80%, rgba(0, 243, 255, 0.12) 0%, transparent 42%),
+                linear-gradient(to bottom, #0b0b12, #12101d);
+            color: #f0f0f8;
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ネオンテキスト＆グロー */
+        .neon-gold { text-shadow: 0 0 10px rgba(255, 215, 0, 0.75), 0 0 22px rgba(255, 215, 0, 0.45); }
+        .neon-cyan { text-shadow: 0 0 10px rgba(0, 243, 255, 0.75), 0 0 22px rgba(0, 243, 255, 0.45); }
+        .neon-crimson { text-shadow: 0 0 10px rgba(255, 42, 85, 0.85), 0 0 25px rgba(255, 42, 85, 0.55); }
+        .neon-purple { text-shadow: 0 0 10px rgba(184, 41, 255, 0.85), 0 0 22px rgba(184, 41, 255, 0.45); }
+
+        /* 画面シェイクアニメーション */
+        @keyframes shakeLight {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-4px, 3px); }
+            50% { transform: translate(4px, -3px); }
+            75% { transform: translate(-3px, -2px); }
+        }
+        @keyframes shakeHeavy {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            15% { transform: translate(-11px, 9px) rotate(-1.2deg); }
+            30% { transform: translate(11px, -9px) rotate(1.2deg); }
+            45% { transform: translate(-9px, -7px) rotate(-0.6deg); }
+            60% { transform: translate(9px, 7px) rotate(0.6deg); }
+            75% { transform: translate(-4px, 4px); }
+        }
+        .shake-light { animation: shakeLight 0.28s ease-in-out; }
+        .shake-heavy { animation: shakeHeavy 0.45s cubic-bezier(.36,.07,.19,.97); }
+
+        /* ダイスデザイン */
+        .die-card {
+            background: linear-gradient(145deg, #1d1c2e, #12111d);
+            border: 2px solid #383654;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .die-card:hover:not(.die-used) {
+            transform: translateY(-3px);
+            border-color: #6b689c;
+        }
+        .die-selected {
+            border-color: var(--cyan) !important;
+            background: linear-gradient(145deg, #162b38, #0f1b24) !important;
+            box-shadow: 0 0 18px rgba(0, 243, 255, 0.55), inset 0 0 10px rgba(0, 243, 255, 0.25) !important;
+            transform: translateY(-7px) scale(1.04) !important;
+        }
+        .die-gold-face {
+            border-color: rgba(255, 215, 0, 0.65);
+            background: linear-gradient(145deg, #2d2511, #191409);
+        }
+        .die-used {
+            opacity: 0.35;
+            filter: grayscale(80%);
+            transform: scale(0.95);
+            cursor: not-allowed;
+        }
+        @keyframes dieRoll {
+            0% { transform: rotate(-18deg) scale(0.85); }
+            50% { transform: rotate(14deg) scale(1.1); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+        .die-rolling { animation: dieRoll 0.25s ease-out; }
+
+        @keyframes pulseHint {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 243, 255, 0.7); }
+            50% { box-shadow: 0 0 0 8px rgba(0, 243, 255, 0); }
+        }
+        .die-hint-pulse { animation: pulseHint 0.8s infinite; border-color: var(--cyan) !important; }
+
+        /* スキルカードデザイン */
+        .skill-card {
+            background: linear-gradient(160deg, #1a1929 0%, #100f1a 100%);
+            border: 2px solid #35334d;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.65);
+            transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .skill-card:hover:not(.card-disabled) {
+            transform: translateY(-6px);
+            border-color: var(--gold);
+            box-shadow: 0 10px 24px rgba(255, 215, 0, 0.25);
+        }
+        .skill-card:active:not(.card-disabled) {
+            transform: scale(0.97);
+        }
+        .card-ready {
+            border-color: rgba(0, 243, 255, 0.75);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.22);
+        }
+        .card-disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* 契約カード選択 */
+        .pact-card {
+            transition: all 0.16s ease;
+        }
+        .pact-card.active {
+            border-color: #ffd700 !important;
+            background: linear-gradient(145deg, #2a2212, #16120c) !important;
+            box-shadow: 0 0 16px rgba(255, 215, 0, 0.35);
+        }
+
+        /* フローティングダメージ演出 */
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translate(-50%, 0) scale(0.7); }
+            20% { opacity: 1; transform: translate(-50%, -18px) scale(1.15); }
+            100% { opacity: 0; transform: translate(-50%, -75px) scale(0.95); }
+        }
+        .floating-text {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            font-weight: 900;
+            animation: floatUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            white-space: nowrap;
+        }
+
+        /* 敵のアイドル浮遊アニメーション */
+        @keyframes enemyFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .enemy-float { animation: enemyFloat 3s ease-in-out infinite; }
+
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0b0b12; }
+        ::-webkit-scrollbar-thumb { background: #35334d; border-radius: 9999px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- ==================== 1. タイトル画面 ==================== -->
+    <div id="title-screen" class="flex-1 flex flex-col items-center justify-center px-4 py-8 text-center">
+        <div class="max-w-2xl w-full bg-[#13121e]/92 border-2 border-[#383556] rounded-3xl p-5 sm:p-9 shadow-2xl backdrop-blur-md">
+            <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-purple-950/80 border border-purple-500/50 text-purple-300 text-xs sm:text-sm font-bold tracking-widest mb-3">
+                <span>UNDERGROUND DICE ROGUELIKE</span>
+                <span class="px-2 py-0.5 rounded bg-yellow-500 text-black font-black text-[10px]">VER 2.4</span>
+            </div>
+            <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-rose-500 mb-2 drop-shadow-lg">
+                CHEAT &amp; SLAY
+            </h1>
+            <p class="text-lg sm:text-xl font-bold text-cyan-300 neon-cyan mb-4">
+                〜 イカサマ上等ダイスローグ 〜
+            </p>
+            <p class="text-gray-300 text-xs sm:text-sm leading-relaxed mb-5">
+                全20階層＋無限エンドレスモード（勝ち逃げキャッシュアウト対応）！<br>
+                サイコロを<span class="text-yellow-400 font-bold">「全面6」</span>や<span class="text-cyan-400 font-bold">「×3倍率面」</span>に違法改造し、<br>
+                全24種のカードと全20種の遺物シナジーで<span class="text-rose-400 font-bold">限界突破の破壊火力</span>を叩き込め！
+            </p>
+
+            <!-- 自己ベスト表示 -->
+            <div id="title-best-bar" class="mb-5 bg-black/45 border border-yellow-500/30 rounded-2xl px-4 py-2.5 flex flex-wrap justify-center gap-4 text-xs font-bold text-gray-300">
+                <span>🏆 最高到達: <span id="best-floor-disp" class="text-yellow-300 font-black">未挑戦</span></span>
+                <span>💥 最大単発: <span id="best-dmg-disp" class="text-rose-400 font-black">0</span></span>
+                <span>👑 20F制覇: <span id="best-clears-disp" class="text-cyan-300 font-black">0回</span></span>
+            </div>
+
+            <!-- 裏カジノ契約（開始ルール選択） -->
+            <div class="mb-6 text-left">
+                <div class="text-xs font-black text-amber-300 mb-2 text-center">📜 テーブル契約を選択して着席</div>
+                <div id="pact-selector" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <!-- JSで描画 -->
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="startNewRun()" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-black font-black text-lg sm:text-xl shadow-lg shadow-rose-600/30 transition transform hover:scale-105 active:scale-95">
+                    🎲 テーブルに着く（ゲーム開始）
+                </button>
+                <button onclick="toggleModal('rules-modal', true)" class="px-6 py-4 rounded-2xl bg-[#1f1d30] hover:bg-[#2a2842] border border-[#47436b] text-gray-200 font-bold text-base transition">
+                    📖 ルール・新要素ガイド
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 2. メイン戦闘画面 ==================== -->
+    <div id="game-screen" class="hidden flex-1 flex flex-col max-w-5xl w-full mx-auto px-3 sm:px-6 py-3 gap-3">
+        
+        <!-- トップステータスバー -->
+        <header class="bg-[#141322]/95 border border-[#32304d] rounded-2xl px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+            <div class="flex items-center gap-2 sm:gap-3.5 flex-wrap">
+                <!-- 階層 -->
+                <div class="px-3 py-1 rounded-xl bg-purple-950/90 border border-purple-500/40 text-purple-200 font-black text-xs sm:text-sm">
+                    FLOOR <span id="ui-floor" class="text-yellow-400 text-base">1</span><span id="ui-max-floor">/20</span>
+                </div>
+                <!-- HP -->
+                <div class="flex items-center gap-1 text-sm sm:text-base font-bold text-rose-400">
+                    <span>❤️</span>
+                    <span id="ui-hp" class="text-white font-black">80</span>/<span id="ui-max-hp">80</span>
+                </div>
+                <!-- シールド -->
+                <div class="flex items-center gap-1 text-sm sm:text-base font-bold text-cyan-400">
+                    <span>🛡️</span>
+                    <span id="ui-shield" class="font-black">0</span>
+                </div>
+                <!-- ゴールド -->
+                <div class="flex items-center gap-1 text-sm sm:text-base font-bold text-yellow-400">
+                    <span>🪙</span>
+                    <span id="ui-gold" class="font-black">0</span>G
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <!-- エンドレス限定：勝ち逃げボタン -->
+                <button id="btn-cashout-header" onclick="confirmCashOut()" class="hidden px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:brightness-110 text-black text-xs sm:text-sm font-black shadow-md shadow-amber-500/25 transition active:scale-95" title="現在の戦績を確定してリザルトへ生還">
+                    🏳️ 勝ち逃げ
+                </button>
+                <!-- デッキ確認ボタン -->
+                <button onclick="openDeckModal('draw')" class="px-3 py-1.5 rounded-xl bg-[#211f36] hover:bg-[#2d2b4a] border border-[#44416b] text-xs sm:text-sm font-bold text-gray-200 transition">
+                    🃏 山札 <span id="ui-deck-count" class="text-cyan-400">0</span>
+                    <span class="text-gray-500 mx-0.5">/</span>
+                    <span class="text-gray-400 text-xs">捨 <span id="ui-discard-count" class="text-gray-200">0</span></span>
+                    <span class="text-[10px] text-gray-400 ml-1">(補充:<span id="ui-reshuffle-left" class="text-amber-300">2</span>)</span>
+                </button>
+                <!-- サウンド切替 -->
+                <button id="btn-mute" onclick="toggleMute()" class="p-2 rounded-xl bg-[#211f36] hover:bg-[#2d2b4a] border border-[#44416b] text-sm transition" title="効果音 ON/OFF">
+                    🔊
+                </button>
+                <!-- ルール -->
+                <button onclick="toggleModal('rules-modal', true)" class="px-3 py-1.5 rounded-xl bg-[#211f36] hover:bg-[#2d2b4a] border border-[#44416b] text-xs sm:text-sm font-bold text-yellow-300 transition">
+                    ？
+                </button>
+            </div>
+        </header>
+
+        <!-- 所持アーティファクト（遺物）バー -->
+        <div id="ui-artifacts-bar" class="bg-[#12111d]/90 border border-[#2c2a42] rounded-2xl px-3 py-2 flex items-center gap-2 overflow-x-auto min-h-[46px]">
+            <span class="text-xs font-bold text-gray-400 shrink-0">🏺 遺物 (<span id="ui-art-count" class="text-purple-300">0</span>/<span id="ui-art-total">20</span>):</span>
+            <div id="ui-artifacts-list" class="flex items-center gap-2">
+                <span class="text-xs text-gray-500">なし（勝利報酬で獲得しよう）</span>
+            </div>
+        </div>
+
+        <!-- 敵＆倍率インフレ表示エリア -->
+        <section class="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+            <!-- 敵ステータス＆ビジュアル -->
+            <div id="enemy-panel" class="md:col-span-8 bg-gradient-to-br from-[#191628] to-[#110f1c] border-2 border-[#393456] rounded-3xl p-4 flex items-center justify-between gap-4 relative overflow-hidden shadow-xl">
+                <div class="flex-1 z-10 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap mb-1">
+                        <span id="ui-enemy-tag" class="px-2.5 py-0.5 rounded-md bg-rose-950 border border-rose-500/40 text-rose-300 text-xs font-bold">ENEMY</span>
+                        <h2 id="ui-enemy-name" class="text-lg sm:text-2xl font-black text-white truncate">チンピラ・ゴブリン</h2>
+                    </div>
+
+                    <!-- 敵の行動予告（インテント） -->
+                    <div id="ui-enemy-intent" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-black/50 border border-rose-500/50 text-rose-300 text-xs sm:text-sm font-bold mb-3">
+                        ⚔️ 次の行動: 攻撃 12
+                    </div>
+
+                    <!-- 敵HPバー -->
+                    <div class="w-full bg-gray-900/90 rounded-full h-5 p-0.5 border border-gray-700 overflow-hidden relative">
+                        <div id="ui-enemy-hp-bar" class="bg-gradient-to-r from-rose-600 to-amber-500 h-full rounded-full transition-all duration-300" style="width: 100%;"></div>
+                        <div class="absolute inset-0 flex items-center justify-center text-xs font-black text-white drop-shadow">
+                            <span id="ui-enemy-hp">45</span> / <span id="ui-enemy-max-hp">45</span>
+                        </div>
+                    </div>
+                    <div id="ui-enemy-shield-wrap" class="hidden mt-1.5 text-xs font-bold text-cyan-300">
+                        🛡️ 敵シールド: <span id="ui-enemy-shield">0</span>
+                    </div>
+                </div>
+
+                <!-- 敵SVGアート -->
+                <div id="ui-enemy-svg" class="w-24 h-24 sm:w-32 sm:h-32 shrink-0 flex items-center justify-center enemy-float z-10">
+                    <!-- JSで動的生成 -->
+                </div>
+            </div>
+
+            <!-- ターン倍率＆シナジーモニター -->
+            <div class="md:col-span-4 bg-gradient-to-br from-[#1f192e] to-[#13101f] border-2 border-yellow-500/40 rounded-3xl p-3.5 flex flex-col justify-center items-center text-center shadow-xl relative overflow-hidden">
+                <span class="text-[11px] font-bold tracking-wider text-yellow-300/80 uppercase mb-0.5">TOTAL MULTIPLIER</span>
+                <div id="ui-turn-mult" class="text-2xl sm:text-3xl font-black text-yellow-400 neon-gold transition-transform duration-200 break-all px-1">
+                    ×1.0
+                </div>
+                <div id="ui-synergy-info" class="mt-2 flex flex-wrap justify-center gap-1 text-[11px] text-cyan-300 font-semibold">
+                    <span class="px-2 py-0.5 rounded bg-black/40 border border-white/10">基礎 ×1.0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ダイストレイ（サイコロ置き場） -->
+        <section class="bg-[#131220]/95 border border-[#32304d] rounded-3xl p-3 sm:p-4 shadow-lg">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm sm:text-base font-black text-cyan-300">🎲 ダイストレイ (<span id="ui-dice-count">5</span>/10)</span>
+                    <span class="text-xs text-gray-400 hidden sm:inline">（タップ or 1〜0キーで選択）</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="btn-clear-die" onclick="clearSelectedDie()" class="hidden px-2.5 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-600 text-gray-200 font-bold text-xs transition">
+                        ✕ 選択解除
+                    </button>
+                    <button id="btn-reroll" onclick="rerollDice()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-40 text-white font-bold text-xs sm:text-sm shadow transition active:scale-95">
+                        🔄 全未使用ダイス振り直し (<span id="ui-rerolls">2</span>)
+                    </button>
+                </div>
+            </div>
+
+            <!-- ダイス一覧コンテナ -->
+            <div id="ui-dice-tray" class="grid grid-cols-5 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-3">
+                <!-- JSでダイスを描画 -->
+            </div>
+        </section>
+
+        <!-- 手札（スキルカード）エリア -->
+        <section class="bg-[#11101c]/95 border border-[#2d2b45] rounded-3xl p-3 sm:p-4 shadow-lg flex-1 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2.5 flex-wrap gap-1">
+                <span class="text-sm sm:text-base font-black text-amber-300">🃏 手札スキル</span>
+                <span id="ui-action-hint" class="text-xs font-bold text-cyan-300 animate-pulse">ダイスを選択するか、ダイス不要カードをタップ！</span>
+            </div>
+
+            <!-- カード一覧 -->
+            <div id="ui-hand-area" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3 mb-3">
+                <!-- JSでカードを描画 -->
+            </div>
+
+            <!-- ターン終了ボタン -->
+            <div class="flex justify-end pt-1 border-t border-gray-800/80">
+                <button id="btn-end-turn" onclick="endPlayerTurn()" class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-700 to-purple-800 hover:from-rose-600 hover:to-purple-700 text-white font-black text-sm sm:text-base shadow-lg transition transform active:scale-95">
+                    ⏳ ターン終了（敵の行動へ）
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- ==================== 3. 戦闘勝利・報酬＆闇ショップ画面 ==================== -->
+    <div id="reward-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="max-w-3xl w-full bg-[#151424] border-2 border-yellow-500/60 rounded-3xl p-5 sm:p-8 shadow-2xl my-auto">
+            <div class="text-center mb-5">
+                <span class="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-xs font-black tracking-widest">STAGE CLEAR!</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-white mt-2">勝利報酬を選択しろ！</h2>
+                <p id="reward-heal-msg" class="text-xs sm:text-sm text-emerald-400 font-bold mt-1">❤️ 休息により HPが 20 回復し、賞金を獲得した！</p>
+                
+                <!-- 報酬画面ステータスバー -->
+                <div class="mt-2.5 flex flex-wrap justify-center gap-2 text-xs font-bold">
+                    <span class="px-3 py-1 rounded-xl bg-black/50 border border-rose-500/40 text-rose-300">
+                        ❤️ HP: <span id="reward-hp-display" class="text-white">80/80</span>
+                    </span>
+                    <span class="px-3 py-1 rounded-xl bg-black/50 border border-yellow-500/40 text-yellow-300">
+                        🪙 所持金: <span id="reward-gold-display" class="text-white">0</span> G
+                    </span>
+                    <span class="px-3 py-1 rounded-xl bg-black/50 border border-cyan-500/40 text-cyan-300">
+                        🃏 デッキ: <span id="reward-deck-display" class="text-white">8</span>/25 枚
+                    </span>
+                    <span class="px-3 py-1 rounded-xl bg-black/50 border border-purple-500/40 text-purple-300">
+                        🏺 遺物: <span id="reward-art-display" class="text-white">0/20</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- 報酬カテゴリー選択（無料報酬3種 ＋ 闇ショップ ＋ エンドレス勝ち逃げ） -->
+            <div id="reward-step-1" class="space-y-3.5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <!-- 1: カード獲得 -->
+                    <button id="btn-reward-cat-card" onclick="openRewardSub('card')" class="p-4 rounded-2xl bg-[#1d1b30] hover:bg-[#272442] border-2 border-cyan-500/50 text-left transition flex flex-col justify-between group">
+                        <div>
+                            <div class="text-2xl mb-1">🃏</div>
+                            <div class="font-black text-cyan-300 text-base sm:text-lg group-hover:underline">新スキル獲得</div>
+                            <p id="reward-card-cat-desc" class="text-xs text-gray-300 mt-1">全24種のカードから提示された3枚のうち1枚を獲得（同名最大3枚・デッキ上限25枚）。</p>
+                        </div>
+                        <span id="reward-card-cat-cta" class="mt-3 text-xs font-bold text-cyan-400">無料報酬を選ぶ ➔</span>
+                    </button>
+
+                    <!-- 2: 遺物獲得 -->
+                    <button onclick="openRewardSub('artifact')" class="p-4 rounded-2xl bg-[#1d1b30] hover:bg-[#272442] border-2 border-purple-500/50 text-left transition flex flex-col justify-between group">
+                        <div>
+                            <div class="text-2xl mb-1">🏺</div>
+                            <div class="font-black text-purple-300 text-base sm:text-lg group-hover:underline">イカサマ遺物</div>
+                            <p id="reward-art-cat-desc" class="text-xs text-gray-300 mt-1">全20種の遺物から提示された3択のうち1つを獲得する。</p>
+                        </div>
+                        <span id="reward-art-cat-cta" class="mt-3 text-xs font-bold text-purple-400">無料報酬を選ぶ ➔</span>
+                    </button>
+
+                    <!-- 3: ダイス改造手術 -->
+                    <button onclick="openRewardSub('dice')" class="p-4 rounded-2xl bg-[#1d1b30] hover:bg-[#272442] border-2 border-yellow-500/60 text-left transition flex flex-col justify-between group">
+                        <div>
+                            <div class="text-2xl mb-1">🎲</div>
+                            <div class="font-black text-yellow-300 text-base sm:text-lg group-hover:underline">ダイス違法改造</div>
+                            <p class="text-xs text-gray-300 mt-1">所持ダイスの出目を「全面6」や「×3倍率面」に書き換える！</p>
+                        </div>
+                        <span class="mt-3 text-xs font-bold text-yellow-400">無料改造する ➔</span>
+                    </button>
+                </div>
+
+                <!-- 闇ショップ -->
+                <div class="pt-2 border-t border-gray-800">
+                    <button onclick="openRewardSub('shop')" class="w-full p-3.5 rounded-2xl bg-gradient-to-r from-amber-950/90 to-rose-950/90 hover:from-amber-900 hover:to-rose-900 border border-amber-400/60 flex items-center justify-between transition">
+                        <div class="flex items-center gap-3 text-left">
+                            <span class="text-2xl">💰</span>
+                            <div>
+                                <div class="font-black text-amber-300 text-sm sm:text-base">裏カジノの闇ショップ（報酬を選ぶ前に何度でも利用可能）</div>
+                                <div class="text-xs text-gray-300">ゴールドを消費して、不要カード削除・最大HP強化・追加ダイス購入！</div>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black text-amber-300 shrink-0">入店する ➔</span>
+                    </button>
+                </div>
+
+                <!-- エンドレス限定：勝ち逃げ（キャッシュアウト）ボタン -->
+                <div id="reward-cashout-wrap" class="hidden pt-1">
+                    <button onclick="cashOutEndless()" class="w-full p-3.5 rounded-2xl bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 hover:brightness-110 text-black flex items-center justify-between shadow-lg shadow-amber-500/25 transition transform hover:scale-[1.01]">
+                        <div class="flex items-center gap-3 text-left">
+                            <span class="text-2xl">🏆</span>
+                            <div>
+                                <div class="font-black text-sm sm:text-base">ここで勝ち逃げする（戦績確定・リザルト画面へ）</div>
+                                <div class="text-xs text-black/80 font-bold">現在の到達フロア・最大ダメージ・所持金を記録して生還します。</div>
+                            </div>
+                        </div>
+                        <span class="text-xs font-black shrink-0">勝ち逃げ確定 ➔</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- サブ選択エリア（カード・遺物・ダイス改造・ショップ） -->
+            <div id="reward-sub-area" class="hidden bg-[#0e0d17] border border-[#333052] rounded-2xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 id="reward-sub-title" class="font-black text-base sm:text-lg text-yellow-300">報酬を選択</h3>
+                    <button onclick="backToRewardCategories()" class="text-xs text-gray-400 hover:text-white underline">← カテゴリ選択に戻る</button>
+                </div>
+                <div id="reward-sub-content" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 4. リザルト（20層クリア / 勝ち逃げ / ゲームオーバー）画面 ==================== -->
+    <div id="result-screen" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="max-w-lg w-full bg-[#151424] border-2 border-[#45416e] rounded-3xl p-6 sm:p-8 text-center shadow-2xl">
+            <div id="result-badge" class="inline-block px-4 py-1 rounded-full text-xs font-black tracking-widest mb-3">RESULT</div>
+            <h2 id="result-title" class="text-3xl sm:text-4xl font-black mb-2">GAME OVER</h2>
+            <p id="result-desc" class="text-sm text-gray-300 mb-5">裏カジノの闇に飲まれた……</p>
+
+            <div id="new-record-banner" class="hidden mb-4 py-1.5 px-4 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-black tracking-widest animate-pulse">
+                ✨ NEW PERSONAL RECORD! 自己ベスト更新！ ✨
+            </div>
+
+            <div class="bg-[#0d0c16] border border-[#2d2b47] rounded-2xl p-4 mb-6 space-y-2.5 text-sm">
+                <div class="flex justify-between items-center gap-3">
+                    <span class="text-gray-400 shrink-0">契約ルール</span>
+                    <span id="stat-pact" class="font-black text-cyan-300 text-right">標準テーブル</span>
+                </div>
+                <div class="flex justify-between items-center gap-3">
+                    <span class="text-gray-400 shrink-0">到達フロア</span>
+                    <span id="stat-floor" class="font-black text-white text-right">Floor 1</span>
+                </div>
+                <div class="flex justify-between items-center gap-3">
+                    <span class="text-gray-400 shrink-0">最大単発ダメージ</span>
+                    <span id="stat-max-dmg" class="font-black text-yellow-400 text-base text-right break-all">0</span>
+                </div>
+                <div class="flex justify-between items-center gap-3">
+                    <span class="text-gray-400 shrink-0">総与ダメージ</span>
+                    <span id="stat-total-dmg" class="font-black text-rose-300 text-right break-all">0</span>
+                </div>
+                <div class="flex justify-between items-center gap-3">
+                    <span class="text-gray-400 shrink-0">獲得した遺物数</span>
+                    <span id="stat-artifacts" class="font-black text-purple-300 text-right">0 / 20 個</span>
+                </div>
+                <div class="flex justify-between items-center gap-3">
+                    <span class="text-gray-400 shrink-0">最終所持ゴールド</span>
+                    <span id="stat-gold" class="font-black text-amber-300 text-right">0 G</span>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <button id="btn-endless-mode" onclick="enterEndlessMode()" class="hidden w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-cyan-500 hover:brightness-110 text-white font-black text-lg shadow-lg shadow-purple-600/40 transition transform hover:scale-105">
+                    ♾️ エンドレスモードへ突入（21層〜無限インフレ）
+                </button>
+                <button onclick="backToTitle()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-black font-black text-base sm:text-lg shadow-lg transition transform hover:scale-105">
+                    🎲 タイトルへ戻る（再挑戦・契約変更）
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 5. ルール＆デッキ確認モーダル ==================== -->
+    <div id="rules-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="max-w-lg w-full bg-[#161526] border border-[#45416e] rounded-3xl p-5 sm:p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-black text-yellow-400">📖 ver 2.4 ルール＆バランス調整ガイド</h3>
+                <button onclick="toggleModal('rules-modal', false)" class="px-3 py-1 rounded-lg bg-gray-800 text-gray-300 hover:text-white font-bold">✕</button>
+            </div>
+            <div class="space-y-3 text-xs sm:text-sm text-gray-300 leading-relaxed">
+                <div class="p-3 rounded-xl bg-black/40 border border-gray-800">
+                    <div class="font-bold text-amber-300 mb-1">1. エンドレス「🏆 勝ち逃げ（キャッシュアウト）」</div>
+                    20層クリア後のエンドレスモードでは、報酬画面やヘッダーの<span class="text-yellow-300 font-bold">「🏳️ 勝ち逃げ」</span>ボタンからいつでも生還して戦績確定（リザルト表示）が可能！
+                </div>
+                <div class="p-3 rounded-xl bg-black/40 border border-gray-800">
+                    <div class="font-bold text-cyan-300 mb-1">2. デッキ上限＆抜け穴防止ルール（ver 2.4）</div>
+                    ・デッキ枚数は<span class="text-yellow-300 font-bold">最大25枚</span>、同名カードは<span class="text-yellow-300 font-bold">最大3枚まで</span>所持可能。<br>
+                    ・『万華鏡の欠片』で複製されたカードは<span class="text-purple-300 font-bold">✨幻影（使用・ターン終了で消滅）</span>になり、山札に増殖しない。<br>
+                    ・『裏面のすり替え』は<span class="text-cyan-300 font-bold">1ターン1回制限</span> / 『裏カジノの徴収人』は<span class="text-amber-300 font-bold">1戦闘最大+100G</span>。<br>
+                    ・『背水の陣』契約中は<span class="text-rose-400 font-bold">最大HP40完全固定</span>。
+                </div>
+                <div class="p-3 rounded-xl bg-black/40 border border-gray-800">
+                    <div class="font-bold text-purple-300 mb-1">3. PCショートカット＆無限ループ防止</div>
+                    ・<span class="text-amber-300 font-bold">1〜0キー</span>でダイス選択、<span class="text-amber-300 font-bold">Rキー</span>で振り直し、<span class="text-amber-300 font-bold">Esc</span>で選択解除、<span class="text-amber-300 font-bold">Enter</span>でターン終了。<br>
+                    ・山札リシャッフルは1ターン2回まで / トレイ上限10個 / 全20種遺物コンプ後の重複は自動+80G換金。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="deck-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full bg-[#161526] border border-[#45416e] rounded-3xl p-5 sm:p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-lg sm:text-xl font-black text-cyan-300">🃏 カード内訳確認</h3>
+                <button onclick="toggleModal('deck-modal', false)" class="px-3 py-1 rounded-lg bg-gray-800 text-gray-300 hover:text-white font-bold">✕</button>
+            </div>
+            <div class="flex gap-2 mb-4">
+                <button id="tab-deck-draw" onclick="openDeckModal('draw')" class="flex-1 py-2 rounded-xl text-xs sm:text-sm font-black border transition">
+                    山札 (<span id="tab-count-draw">0</span>)
+                </button>
+                <button id="tab-deck-discard" onclick="openDeckModal('discard')" class="flex-1 py-2 rounded-xl text-xs sm:text-sm font-black border transition">
+                    捨て札 (<span id="tab-count-discard">0</span>)
+                </button>
+                <button id="tab-deck-all" onclick="openDeckModal('all')" class="flex-1 py-2 rounded-xl text-xs sm:text-sm font-black border transition">
+                    全デッキ (<span id="tab-count-all">0</span>)
+                </button>
+            </div>
+            <div id="deck-modal-desc" class="text-xs text-gray-400 mb-3"></div>
+            <div id="deck-modal-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5"></div>
+        </div>
+    </div>
+
+    <!-- トースト通知 -->
+    <div id="toast-box" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-opacity duration-300 opacity-0">
+        <div id="toast-msg" class="px-4 py-2 rounded-full bg-cyan-950/95 border border-cyan-400 text-cyan-200 text-xs sm:text-sm font-bold shadow-lg whitespace-nowrap"></div>
+    </div>
+
+    <script>
+        /* =====================================================================
+         * 1. Web Audio API サウンドシンセサイザー
+         * ===================================================================== */
+        const SoundFX = {
+            ctx: null,
+            muted: false,
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) this.ctx = new AudioContext();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            },
+            playTone(freq, type, duration, vol = 0.15, slideTo = null) {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    if (slideTo) {
+                        osc.frequency.exponentialRampToValueAtTime(slideTo, this.ctx.currentTime + duration);
+                    }
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {}
+            },
+            diceRoll() {
+                for (let i = 0; i < 4; i++) {
+                    setTimeout(() => this.playTone(300 + Math.random() * 400, 'triangle', 0.06, 0.12), i * 45);
+                }
+            },
+            select() {
+                this.playTone(620, 'sine', 0.08, 0.12, 880);
+            },
+            cardPlay() {
+                this.playTone(440, 'triangle', 0.12, 0.15, 660);
+            },
+            buff() {
+                this.playTone(523.25, 'sine', 0.15, 0.15, 1046.5);
+            },
+            hit(isBig = false) {
+                if (isBig) {
+                    this.playTone(140, 'sawtooth', 0.35, 0.25, 35);
+                    this.playTone(90, 'square', 0.3, 0.2, 28);
+                } else {
+                    this.playTone(180, 'sawtooth', 0.16, 0.18, 55);
+                }
+            },
+            win() {
+                const notes = [523.25, 659.25, 783.99, 1046.5];
+                notes.forEach((n, idx) => setTimeout(() => this.playTone(n, 'triangle', 0.25, 0.16), idx * 90));
+            }
+        };
+
+        function toggleMute() {
+            SoundFX.muted = !SoundFX.muted;
+            document.getElementById('btn-mute').innerText = SoundFX.muted ? '🔇' : '🔊';
+        }
+
+        /* =====================================================================
+         * 2. 定数・ゲームデータ定義（契約4種・カード24種・遺物20種・敵20階層＋無限）
+         * ===================================================================== */
+        const MAX_DICE_IN_TRAY = 10;
+        const MAX_RESHUFFLES_PER_TURN = 2;
+        const MAX_DECK_SIZE = 25;
+        const MAX_SAME_CARD_COPIES = 3;
+        const TAX_COLLECTOR_CAP_PER_BATTLE = 100;
+        const RECORD_STORAGE_KEY = 'cheat_slay_records_v1';
+
+        const PACTS = [
+            {
+                id: 'standard',
+                name: '🎲 標準テーブル',
+                desc: 'HP80 / 40G。王道の裏カジノルール。',
+                hp: 80, gold: 40, enemyHpMult: 1.0, startMult: 1.0,
+                bonusArtifact: false, chaosDice: false
+            },
+            {
+                id: 'high_roller',
+                name: '👑 ハイローラー',
+                desc: '所持金200G＆初期遺物1個！敵HP1.5倍。',
+                hp: 80, gold: 200, enemyHpMult: 1.5, startMult: 1.0,
+                bonusArtifact: true, chaosDice: false
+            },
+            {
+                id: 'glass_cannon',
+                name: '💀 背水の陣',
+                desc: '最大HP40固定！初期倍率×2.0スタート。',
+                hp: 40, gold: 60, enemyHpMult: 1.0, startMult: 2.0,
+                bonusArtifact: false, chaosDice: false
+            },
+            {
+                id: 'chaos_dice',
+                name: '🎰 カオスダイス',
+                desc: '初期ダイス2個に×2倍率面搭載（他面1〜3）。',
+                hp: 80, gold: 50, enemyHpMult: 1.15, startMult: 1.0,
+                bonusArtifact: false, chaosDice: true
+            }
+        ];
+
+        let selectedPactId = 'standard';
+
+        const CARD_DB = {
+            // --- 初期＆基本カード ---
+            heavy_strike: {
+                id: 'heavy_strike', name: '強打', req: 'any', reqLabel: '任意の出目',
+                color: 'border-rose-500/60', badgeColor: 'bg-rose-950 text-rose-300',
+                desc: (val, mult, state) => `敵に <span class="text-yellow-300 font-black">${formatNum(calcAttackDamage(val * 5, val, mult, state))}</span> ダメージを与える。`
+            },
+            double_up: {
+                id: 'double_up', name: 'ダブルアップ', req: 'any', reqLabel: '任意の出目',
+                color: 'border-yellow-500/70', badgeColor: 'bg-yellow-950 text-yellow-300',
+                desc: (val) => val >= 6
+                    ? `ターン倍率を <span class="text-yellow-300 font-black">×3倍</span> にする！（6ボーナス）`
+                    : `ターン倍率を <span class="text-cyan-300 font-black">×2倍</span> にする。（6なら×3倍）`
+            },
+            sleight_hand: {
+                id: 'sleight_hand', name: 'イカサマすり替え', req: 'none', reqLabel: 'ダイス不要',
+                color: 'border-cyan-500/70', badgeColor: 'bg-cyan-950 text-cyan-300',
+                desc: () => `最も低い未使用ダイス最大2個を <span class="text-yellow-300 font-black">「6」</span> に書き換え、1枚ドロー。`
+            },
+            iron_bluff: {
+                id: 'iron_bluff', name: '鉄壁のブラフ', req: 'any', reqLabel: '任意の出目',
+                color: 'border-blue-500/60', badgeColor: 'bg-blue-950 text-blue-300',
+                desc: (val, mult) => `シールドを <span class="text-cyan-300 font-black">${formatNum(Math.floor(val * 4 * mult))}</span> 獲得する。`
+            },
+            pair_barrage: {
+                id: 'pair_barrage', name: 'ゾロ目連撃', req: 'any', reqLabel: '任意の出目',
+                color: 'border-purple-500/70', badgeColor: 'bg-purple-950 text-purple-300',
+                desc: (val, mult, state) => {
+                    let count = 1;
+                    if (state && state.selectedDieIndex !== null && state.dice[state.selectedDieIndex]) {
+                        const sel = state.dice[state.selectedDieIndex];
+                        count = Math.max(1, state.dice.filter(d => d.current.type === sel.current.type && d.current.val === sel.current.val).length);
+                    }
+                    const single = calcAttackDamage(val * 4, val, mult, state);
+                    return `出目×4ダメージを同じ出目のダイス数(<span class="text-yellow-300 font-bold">${count}回</span>)連打！<br>(計 <span class="text-rose-400 font-black">${formatNum(single * count)}</span>)`;
+                }
+            },
+            mirror_trick: {
+                id: 'mirror_trick', name: '鏡写しのトリック', req: 'any', reqLabel: '任意の出目',
+                color: 'border-purple-400/80', badgeColor: 'bg-purple-900 text-purple-200',
+                desc: () => `選択したダイスの目を、トレイ内の<span class="text-yellow-300 font-black">他の全ダイス</span>にコピーする！`
+            },
+            blood_die: {
+                id: 'blood_die', name: '血のダイス', req: 'none', reqLabel: 'ダイス不要 / HP6+',
+                color: 'border-rose-600/80', badgeColor: 'bg-rose-950 text-rose-300',
+                desc: () => `HPを5消費（HP6以上で使用可）。追加ダイス <span class="text-cyan-300 font-black">+2個</span>＆倍率 <span class="text-yellow-300 font-black">+1.5x</span>！`
+            },
+
+            // --- 追加・報酬強力カード ---
+            overload: {
+                id: 'overload', name: 'オーバーロード', req: 'six', reqLabel: '6 (または倍率面)',
+                color: 'border-amber-400', badgeColor: 'bg-amber-900 text-amber-200',
+                desc: (val, mult, state) => `敵に <span class="text-yellow-300 font-black">${formatNum(calcAttackDamage(120 * (val / 6), val, mult, state))}</span> の超特大ダメージ！`
+            },
+            hyper_inflation: {
+                id: 'hyper_inflation', name: '極大インフレ', req: 'none', reqLabel: 'ダイス不要',
+                color: 'border-yellow-400', badgeColor: 'bg-yellow-900 text-yellow-200',
+                desc: () => `ターン倍率を <span class="text-yellow-300 font-black">×2.5倍</span> に跳ね上げ、振り直し回数 +1。`
+            },
+            fate_rewrite: {
+                id: 'fate_rewrite', name: '運命改竄', req: 'none', reqLabel: 'ダイス不要',
+                color: 'border-fuchsia-400', badgeColor: 'bg-fuchsia-950 text-fuchsia-200',
+                desc: () => `トレイ内の<span class="text-yellow-300 font-black">全ダイスを「6」</span>に変え、倍率 <span class="text-cyan-300 font-black">+1.0x</span>！`
+            },
+            gold_alchemy: {
+                id: 'gold_alchemy', name: '黄金錬成', req: 'any', reqLabel: '任意の出目',
+                color: 'border-amber-500/70', badgeColor: 'bg-amber-950 text-amber-300',
+                desc: (val, mult, state) => `<span class="text-rose-400 font-bold">${formatNum(calcAttackDamage(val * 4, val, mult, state))}</span> ダメージを与え、<span class="text-yellow-300 font-bold">${val * 3}G</span> を強奪する。`
+            },
+            underground_verdict: {
+                id: 'underground_verdict', name: '裏カジノの審判', req: 'even', reqLabel: '偶数のみ',
+                color: 'border-cyan-400', badgeColor: 'bg-cyan-950 text-cyan-200',
+                desc: (val, mult, state) => `<span class="text-rose-400 font-black">${formatNum(calcAttackDamage(val * 8, val, mult, state))}</span> ダメージ＆ <span class="text-cyan-300 font-bold">${formatNum(Math.floor(val * 3 * mult))}</span> シールド！`
+            },
+            exponential_dice: {
+                id: 'exponential_dice', name: '指数関数ダイス', req: 'any', reqLabel: '任意の出目',
+                color: 'border-emerald-400', badgeColor: 'bg-emerald-950 text-emerald-200',
+                desc: (val) => `倍率を <span class="text-yellow-300 font-black">×${(1 + val * 0.35).toFixed(1)}倍</span> に乗算し、手札を <span class="text-cyan-300 font-bold">1枚ドロー</span>！`
+            },
+            dice_cloner: {
+                id: 'dice_cloner', name: '違法複製（クローン）', req: 'any', reqLabel: '任意の出目',
+                color: 'border-teal-400', badgeColor: 'bg-teal-950 text-teal-200',
+                desc: () => `選択ダイスを消費せず、<span class="text-yellow-300 font-black">全く同じ出目のダイス</span>を1個生成（上限10個）！`
+            },
+            execution_666: {
+                id: 'execution_666', name: '断罪の666', req: 'six', reqLabel: '6 (または倍率面)',
+                color: 'border-rose-500', badgeColor: 'bg-rose-900 text-yellow-300',
+                desc: (val, mult, state) => {
+                    const highCount = state ? Math.max(1, state.dice.filter(d => d.current.val >= 6 || d.current.type === 'mult').length) : 1;
+                    const dmg = calcAttackDamage(160 * highCount, val, mult, state);
+                    return `「6以上/倍率面」の数(<span class="text-yellow-300 font-bold">${highCount}個</span>)×160の処刑ダメージ！<br>(計 <span class="text-rose-400 font-black">${formatNum(dmg)}</span>)`;
+                }
+            },
+            all_in_gamble: {
+                id: 'all_in_gamble', name: 'オールイン・ギャンブル', req: 'none', reqLabel: 'ダイス不要',
+                color: 'border-orange-500', badgeColor: 'bg-orange-950 text-orange-200',
+                desc: (val, mult, state) => {
+                    const sh = state ? state.shield : 0;
+                    const dmg = calcAttackDamage(Math.max(30, sh * 3), 6, mult * 2, state);
+                    return `全シールド(<span class="text-cyan-300 font-bold">${formatNum(sh)}</span>)を消費し、倍率×2後に <span class="text-rose-400 font-black">${formatNum(dmg)}</span> ダメージ！`;
+                }
+            },
+            vampire_bet: {
+                id: 'vampire_bet', name: '吸血の賭け', req: 'any', reqLabel: '任意の出目',
+                color: 'border-red-500', badgeColor: 'bg-red-950 text-red-200',
+                desc: (val, mult, state) => {
+                    const dmg = calcAttackDamage(val * 6, val, mult, state);
+                    return `<span class="text-rose-400 font-black">${formatNum(dmg)}</span> ダメージを与え、HPを最大 <span class="text-emerald-400 font-bold">25</span> 吸収回復！`;
+                }
+            },
+            royal_straight: {
+                id: 'royal_straight', name: 'ロイヤル・ストレート', req: 'none', reqLabel: 'ダイス不要',
+                color: 'border-indigo-400', badgeColor: 'bg-indigo-950 text-indigo-200',
+                desc: (val, mult, state) => {
+                    if (!state || !state.dice) {
+                        return `未使用ダイスが全て別数字なら倍率 <span class="text-yellow-300 font-black">×5倍</span>！重複があれば1組ごとに <span class="text-cyan-300 font-bold">+1.5x</span>。`;
+                    }
+                    const unused = state.dice.filter(d => !d.used);
+                    const vals = unused.map(d => `${d.current.type}_${d.current.val}`);
+                    const uniqueSize = new Set(vals).size;
+                    if (unused.length >= 3 && uniqueSize === unused.length) {
+                        return `全バラなら×5倍！<br><span class="text-emerald-300 font-black">【現在: ストレート成立 ×5倍!!】</span>`;
+                    }
+                    const pairs = Math.max(1, vals.length - uniqueSize);
+                    const bonus = +(pairs * 1.5).toFixed(1);
+                    return `全バラで×5倍 / 重複1組+1.5x<br><span class="text-cyan-300 font-black">【現在: 重複ボーナス +${bonus}x】</span>`;
+                }
+            },
+            chaos_roulette: {
+                id: 'chaos_roulette', name: 'カオス・ルーレット', req: 'none', reqLabel: '1T1回 / ダイス不要',
+                oncePerTurn: true,
+                color: 'border-pink-500', badgeColor: 'bg-pink-950 text-pink-200',
+                desc: () => `手札を全て引き直し、未使用ダイスを全リロールして倍率 <span class="text-yellow-300 font-black">×1.8倍</span>！（1ターン1回）`
+            },
+            god_hand: {
+                id: 'god_hand', name: 'ゴッドハンド（神の手）', req: 'none', reqLabel: '1T1回 / ダイス不要',
+                oncePerTurn: true,
+                color: 'border-yellow-300', badgeColor: 'bg-yellow-900 text-yellow-200',
+                desc: () => `このターン、<span class="text-yellow-300 font-black">次に使うカードの効果を2回連続発動</span>させる！（1ターン1回）`
+            },
+
+            // --- ver 2.3 新規追加カード 4種 ---
+            over_limit: {
+                id: 'over_limit', name: 'リミットブレイク', req: 'any', reqLabel: '任意の出目',
+                color: 'border-sky-400', badgeColor: 'bg-sky-950 text-sky-200',
+                desc: (val, mult, state) => {
+                    const sh = state ? state.shield : 0;
+                    const spend = Math.floor(sh * 0.5);
+                    const dmg = calcAttackDamage(Math.max(20, spend * val), val, mult, state);
+                    return `シールド半分(<span class="text-cyan-300 font-bold">${formatNum(spend)}</span>)を消費し、消費量×出目の <span class="text-rose-400 font-black">${formatNum(dmg)}</span> ダメージ！`;
+                }
+            },
+            lucky_seven: {
+                id: 'lucky_seven', name: '禁断の777', req: 'none', reqLabel: '1T1回 / ダイス不要',
+                oncePerTurn: true,
+                color: 'border-amber-300', badgeColor: 'bg-amber-950 text-yellow-300',
+                desc: (val, mult, state) => {
+                    if (!state || !state.dice) {
+                        return `未使用ダイスの合計が <span class="text-yellow-300 font-black">7の倍数</span> なら倍率 <span class="text-yellow-300 font-black">×7倍</span>！（外れは+1.0x）`;
+                    }
+                    const sum = getUnusedDiceSum(state);
+                    const isSeven = sum > 0 && sum % 7 === 0;
+                    const rem = sum === 0 ? 7 : (7 - (sum % 7)) % 7;
+                    return isSeven
+                        ? `未使用合計が7の倍数で <span class="text-yellow-300 font-black">×7倍</span>！<br><span class="text-emerald-300 font-black">【現在合計 ${sum}：777成立 ×7倍!!】</span>`
+                        : `未使用合計が7の倍数で×7倍<br><span class="text-gray-300">【現在合計 ${sum}：あと +${rem} で成立】</span>`;
+                }
+            },
+            loaded_swap: {
+                id: 'loaded_swap', name: '裏面のすり替え', req: 'any', reqLabel: '1T1回 / 任意の出目',
+                oncePerTurn: true,
+                color: 'border-lime-400', badgeColor: 'bg-lime-950 text-lime-200',
+                desc: () => `選択ダイスを消費せず <span class="text-cyan-300 font-black">「×2倍率面」</span> に書き換え、手札を1枚ドロー！（1ターン1回）`
+            },
+            final_gamble: {
+                id: 'final_gamble', name: 'デッド・オア・アライブ', req: 'none', reqLabel: '1T1回 / HP10+',
+                oncePerTurn: true,
+                color: 'border-rose-500', badgeColor: 'bg-rose-950 text-rose-200',
+                desc: (val, mult, state) => {
+                    const cost = state ? Math.floor(state.hp * 0.5) : 40;
+                    return `現在HPの半分(<span class="text-rose-400 font-bold">-${cost}</span>)を賭け、ターン倍率を <span class="text-yellow-300 font-black">×4倍</span> に跳ね上げる！`;
+                }
+            }
+        };
+
+        const ARTIFACT_DB = [
+            // --- 既存16種 ---
+            {
+                id: 'weighted_die', name: '鉛入りのサイコロ', icon: '🎲',
+                desc: '「6」または倍率面が出る・作られるたび、ターン倍率 +0.5x。'
+            },
+            {
+                id: 'demon_doubles', name: 'ゾロ目の悪魔', icon: '😈',
+                desc: 'トレイ内の同じ出目の重複1つにつき、全カード効果が ×2倍 に膨れ上がる！'
+            },
+            {
+                id: 'inflation_gear', name: 'インフレの歯車', icon: '⚙️',
+                desc: '1ターン中にカードを使うたび、以降のカード効果が ×1.5倍 ずつ累積乗算！'
+            },
+            {
+                id: 'odd_fanatic', name: '奇数狂信者', icon: '🔮',
+                desc: '奇数の出目のダイスを使用すると、出目の数値に +10 のボーナス加算。'
+            },
+            {
+                id: 'cheater_cuff', name: 'イカサマ師の袖口', icon: '🎩',
+                desc: '毎ターンの振り直し回数 +2。さらに振り直すたびターン倍率 +0.4x。'
+            },
+            {
+                id: 'scale_of_ruin', name: '破滅の天秤', icon: '⚖️',
+                desc: '自分のHPが50%以下の時、すべてのダメージが ×4倍 になる！'
+            },
+            {
+                id: 'golden_cup', name: '黄金のダイスカップ', icon: '🏆',
+                desc: '毎ターン開始時のダイス数が +2個 増える（上限10個）。'
+            },
+            {
+                id: 'crown_of_greed', name: '強欲の王冠', icon: '👑',
+                desc: '所持ゴールド 10G ごとに、全ダメージ +15% 乗算ボーナス！'
+            },
+            {
+                id: 'golden_lead', name: '黄金の鉛', icon: '🔩',
+                desc: '出目「6」または「12」のダイスで攻撃すると、ダメージがさらに ×2.5倍 になる！'
+            },
+            {
+                id: 'mirage_prism', name: '幻影のプリズム', icon: '💎',
+                desc: 'ダイスを消費するカードを使うたび、35%の確率でダイスが消費されずに残る！'
+            },
+            {
+                id: 'abyssal_ledger', name: '深淵の帳簿', icon: '📜',
+                desc: 'ターン終了時、未使用ダイス1個につき次のターンの初期倍率が +0.8x 持ち越される！'
+            },
+            {
+                id: 'berserker_chip', name: '狂戦士のチップ', icon: '🎰',
+                desc: '最大HP+20。さらに戦闘中カードを使うたび、出目評価に永続 +2 ボーナス！'
+            },
+            {
+                id: 'lucky_seven_charm', name: 'ラッキーセブンの護符', icon: '🍀',
+                desc: '1ターンに3枚カードを使うたび、ダイスを1個追加生成し、手札を1枚ドロー！'
+            },
+            {
+                id: 'royal_scepter', name: '覇王の王笏', icon: '🔱',
+                desc: '倍率面（×2、×3）のダイスを使うと、その倍率効果がさらに2乗（×4、×9）される！'
+            },
+            {
+                id: 'blood_chalice', name: '鮮血の聖杯', icon: '🍷',
+                desc: '戦闘勝利時のHP回復量が +15 増え、さらに最大HPが +5 ずつ成長する！'
+            },
+            {
+                id: 'infinity_engine', name: '無限機関の歯車', icon: '♾️',
+                desc: 'ターン倍率が ×10.0 を超えている間、全カードダメージがさらに ×3倍 になる！'
+            },
+
+            // --- ver 2.3 新規追加遺物 4種 ---
+            {
+                id: 'vip_card', name: '黒のVIPカード', icon: '💳',
+                desc: '裏カジノの闇ショップの全商品が常に 30% OFF になる！'
+            },
+            {
+                id: 'mirror_shard', name: '万華鏡の欠片', icon: '🪞',
+                desc: '毎ターン最初に使ったカードが「✨幻影（使用・終了で消滅）」として手札に1枚複製される（1T1回制限を除く）。'
+            },
+            {
+                id: 'tax_collector', name: '裏カジノの徴収人', icon: '💰',
+                desc: '敵にダメージを与えるたび +5G 獲得（1万ダメ以上なら +15G / 1戦闘最大+100G）！'
+            },
+            {
+                id: 'dice_god_eye', name: '千里眼のモノクル', icon: '🧐',
+                desc: '毎ターン最初の1回だけ、振り直し回数を消費せずに振り直せる！'
+            }
+        ];
+
+        const ENEMY_LIST = [
+            // 1〜10層
+            { floor: 1, name: 'チンピラ・ゴブリン', tag: 'FLOOR 1', maxHp: 45, atk: 10, gold: 25, color: '#4ade80', shape: 'goblin' },
+            { floor: 2, name: '闇カジノの用心棒', tag: 'FLOOR 2', maxHp: 85, atk: 14, gold: 35, color: '#60a5fa', shape: 'bouncer' },
+            { floor: 3, name: '呪われたルーレット精霊', tag: 'FLOOR 3', maxHp: 140, atk: 18, gold: 45, color: '#c084fc', shape: 'spirit' },
+            { floor: 4, name: '黄金のガーゴイル', tag: 'FLOOR 4', maxHp: 220, atk: 22, gold: 60, color: '#fbbf24', shape: 'gargoyle' },
+            { floor: 5, name: '【中ボス】イカサマ公爵ベリアル', tag: 'MID BOSS 1', maxHp: 400, atk: 26, gold: 100, color: '#f43f5e', shape: 'boss1' },
+            { floor: 6, name: '虚無のディーラー', tag: 'FLOOR 6', maxHp: 620, atk: 30, gold: 75, color: '#22d3ee', shape: 'dealer' },
+            { floor: 7, name: '鋼鉄のキメラ', tag: 'FLOOR 7', maxHp: 950, atk: 34, gold: 85, color: '#94a3b8', shape: 'chimera' },
+            { floor: 8, name: '災厄のネクロマンサー', tag: 'FLOOR 8', maxHp: 1450, atk: 38, gold: 100, color: '#a855f7', shape: 'necro' },
+            { floor: 9, name: '深淵の竜騎士', tag: 'FLOOR 9', maxHp: 2300, atk: 43, gold: 120, color: '#fb7185', shape: 'dragon' },
+            { floor: 10, name: '【中ボス】運命の女神フォルトゥーナ', tag: 'MID BOSS 2', maxHp: 4800, atk: 48, gold: 180, color: '#ffd700', shape: 'boss1' },
+
+            // 11〜20層
+            { floor: 11, name: '禁断のチップゴーレム', tag: 'FLOOR 11', maxHp: 7500, atk: 52, gold: 130, color: '#34d399', shape: 'golem' },
+            { floor: 12, name: '白銀の暗殺者ミラージュ', tag: 'FLOOR 12', maxHp: 12000, atk: 56, gold: 140, color: '#e2e8f0', shape: 'assassin' },
+            { floor: 13, name: '混沌のダイス・ヒドラ', tag: 'FLOOR 13', maxHp: 19500, atk: 60, gold: 155, color: '#818cf8', shape: 'hydra' },
+            { floor: 14, name: '紅蓮のバカラ魔王', tag: 'FLOOR 14', maxHp: 32000, atk: 64, gold: 170, color: '#fb7185', shape: 'demon' },
+            { floor: 15, name: '【大ボス】確率の支配者ラプラス', tag: 'AREA BOSS', maxHp: 60000, atk: 70, gold: 260, color: '#38bdf8', shape: 'boss1' },
+            { floor: 16, name: '虚空を喰らうリヴァイアサン', tag: 'FLOOR 16', maxHp: 110000, atk: 75, gold: 200, color: '#2dd4bf', shape: 'leviathan' },
+            { floor: 17, name: '黄金狂の皇帝ミダス', tag: 'FLOOR 17', maxHp: 200000, atk: 80, gold: 250, color: '#facc15', shape: 'emperor' },
+            { floor: 18, name: '終末の審判者メタトロン', tag: 'FLOOR 18', maxHp: 380000, atk: 86, gold: 280, color: '#f472b6', shape: 'angel' },
+            { floor: 19, name: '深淵の混沌竜バハムート', tag: 'FLOOR 19', maxHp: 720000, atk: 92, gold: 320, color: '#c084fc', shape: 'bahamut' },
+            { floor: 20, name: '【真のラスボス】裏カジノの創造神アザトース', tag: 'FINAL BOSS', maxHp: 1500000, atk: 100, gold: 500, color: '#ffd700', shape: 'final' }
+        ];
+
+        function generateEnemyForFloor(floorNum, hpMult = 1.0) {
+            if (floorNum <= ENEMY_LIST.length) {
+                const base = ENEMY_LIST[floorNum - 1];
+                return { ...base, maxHp: Math.floor(base.maxHp * hpMult) };
+            }
+            const extra = floorNum - 20;
+            const scaledHp = Math.floor(1500000 * Math.pow(2.1, extra) * hpMult);
+            const scaledAtk = 100 + extra * 12;
+            const colors = ['#ffd700', '#00f3ff', '#ff2a55', '#b829ff', '#4ade80'];
+            return {
+                floor: floorNum,
+                name: `【無限階層】深淵のオーバーロード Lv.${extra}`,
+                tag: `ENDLESS ${floorNum}F`,
+                maxHp: scaledHp,
+                atk: scaledAtk,
+                gold: 350 + extra * 30,
+                color: colors[extra % colors.length],
+                shape: 'final'
+            };
+        }
+
+        /* =====================================================================
+         * 3. 自己ベスト記録＆タイトル初期化
+         * ===================================================================== */
+        function loadRecords() {
+            try {
+                const raw = localStorage.getItem(RECORD_STORAGE_KEY);
+                return raw ? JSON.parse(raw) : { bestFloor: 0, bestDmg: 0, clears: 0 };
+            } catch (e) {
+                return { bestFloor: 0, bestDmg: 0, clears: 0 };
+            }
+        }
+
+        function saveRecords(rec) {
+            try {
+                localStorage.setItem(RECORD_STORAGE_KEY, JSON.stringify(rec));
+            } catch (e) {}
+        }
+
+        function renderTitleScreen() {
+            const rec = loadRecords();
+            document.getElementById('best-floor-disp').innerText = rec.bestFloor > 0 ? `Floor ${rec.bestFloor}` : '未挑戦';
+            document.getElementById('best-dmg-disp').innerText = formatNum(rec.bestDmg || 0);
+            document.getElementById('best-clears-disp').innerText = `${rec.clears || 0}回`;
+
+            const grid = document.getElementById('pact-selector');
+            grid.innerHTML = PACTS.map(p => `
+                <button onclick="selectPact('${p.id}')" class="pact-card p-2.5 rounded-2xl bg-[#1a1829] hover:bg-[#232038] border-2 ${selectedPactId === p.id ? 'active' : 'border-[#333052]'} text-left flex flex-col justify-between">
+                    <div class="font-black text-xs sm:text-sm text-white">${p.name}</div>
+                    <p class="text-[10px] sm:text-[11px] text-gray-300 mt-1 leading-snug">${p.desc}</p>
+                </button>
+            `).join('');
+        }
+
+        function selectPact(id) {
+            SoundFX.select();
+            selectedPactId = id;
+            renderTitleScreen();
+        }
+
+        /* =====================================================================
+         * 4. ゲーム状態管理 (State)
+         * ===================================================================== */
+        let gameState = {};
+
+        function createDefaultDiceTemplate(isChaos = false) {
+            const templates = [];
+            for (let i = 0; i < 5; i++) {
+                if (isChaos && i < 2) {
+                    templates.push([
+                        { type: 'num', val: 1 },
+                        { type: 'num', val: 2 },
+                        { type: 'num', val: 3 },
+                        { type: 'num', val: 3 },
+                        { type: 'mult', val: 2 },
+                        { type: 'mult', val: 2 }
+                    ]);
+                } else {
+                    templates.push([
+                        { type: 'num', val: 1 },
+                        { type: 'num', val: 2 },
+                        { type: 'num', val: 3 },
+                        { type: 'num', val: 4 },
+                        { type: 'num', val: 5 },
+                        { type: 'num', val: 6 }
+                    ]);
+                }
+            }
+            return templates;
+        }
+
+        function startNewRun() {
+            SoundFX.init();
+            SoundFX.win();
+
+            const pact = PACTS.find(p => p.id === selectedPactId) || PACTS[0];
+            const startArtifacts = [];
+            if (pact.bonusArtifact) {
+                const picked = ARTIFACT_DB[Math.floor(Math.random() * ARTIFACT_DB.length)];
+                startArtifacts.push(picked);
+            }
+
+            let initHp = pact.hp;
+            if (pact.id !== 'glass_cannon' && startArtifacts.some(a => a.id === 'berserker_chip')) {
+                initHp += 20;
+            }
+
+            gameState = {
+                pact,
+                floor: 1,
+                endless: false,
+                isTransitioning: false,
+                hp: initHp,
+                maxHp: initHp,
+                shield: 0,
+                gold: pact.gold,
+                taxGoldThisBattle: 0,
+                maxSingleDmg: 0,
+                totalDmgDealt: 0,
+                diceTemplates: createDefaultDiceTemplate(pact.chaosDice),
+                deck: [
+                    'heavy_strike', 'heavy_strike', 'double_up', 'sleight_hand',
+                    'iron_bluff', 'pair_barrage', 'mirror_trick', 'blood_die'
+                ],
+                drawPile: [],
+                discardPile: [],
+                hand: [],
+                artifacts: startArtifacts,
+                dice: [],
+                selectedDieIndex: null,
+                rerolls: 2,
+                freeRerollUsed: false,
+                turnMult: pact.startMult,
+                carryOverMult: 0,
+                cardsPlayedThisTurn: 0,
+                reshufflesThisTurn: 0,
+                usedOncePerTurn: {},
+                mirrorShardUsed: false,
+                berserkerBonus: 0,
+                doubleCastNext: false,
+                enemy: null,
+                turnCount: 0
+            };
+
+            document.getElementById('title-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('reward-modal').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            setupFloor(1);
+        }
+
+        function backToTitle() {
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('reward-modal').classList.add('hidden');
+            document.getElementById('title-screen').classList.remove('hidden');
+            renderTitleScreen();
+        }
+
+        function enterEndlessMode() {
+            gameState.endless = true;
+            gameState.isTransitioning = false;
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            const healed = Math.min(gameState.maxHp - gameState.hp, 30);
+            gameState.hp += healed;
+            document.getElementById('reward-heal-msg').innerText = `♾️ エンドレス突入ボーナス！ HP +${healed} 回復！`;
+
+            renderAll();
+            backToRewardCategories();
+            toggleModal('reward-modal', true);
+        }
+
+        function confirmCashOut() {
+            if (!gameState.endless || gameState.isTransitioning) return;
+            if (confirm(`現在 Floor ${gameState.floor} で勝ち逃げ（戦績確定）して終了しますか？`)) {
+                cashOutEndless();
+            }
+        }
+
+        function cashOutEndless() {
+            if (gameState.isTransitioning) return;
+            gameState.isTransitioning = true;
+            toggleModal('reward-modal', false);
+            SoundFX.win();
+            showResultScreen('cashout');
+        }
+
+        function hasArtifact(id) {
+            return gameState.artifacts.some(a => a.id === id);
+        }
+
+        function isHpLocked() {
+            return gameState.pact && gameState.pact.id === 'glass_cannon';
+        }
+
+        function inspectArtifact(idx) {
+            const a = gameState.artifacts[idx];
+            if (!a) return;
+            showToast(`${a.icon} ${a.name}：${a.desc}`);
+        }
+
+        /* =====================================================================
+         * 5. フロア＆ターン進行ロジック
+         * ===================================================================== */
+        function setupFloor(floorNum) {
+            gameState.floor = floorNum;
+            gameState.isTransitioning = false;
+            gameState.taxGoldThisBattle = 0;
+            const enemyBase = generateEnemyForFloor(floorNum, gameState.pact.enemyHpMult);
+            gameState.enemy = {
+                ...enemyBase,
+                hp: enemyBase.maxHp,
+                shield: 0,
+                intent: { type: 'attack', val: enemyBase.atk }
+            };
+
+            gameState.drawPile = shuffleArray([...gameState.deck]);
+            gameState.discardPile = [];
+            gameState.hand = [];
+            gameState.shield = 0;
+            gameState.turnCount = 0;
+            gameState.carryOverMult = 0;
+            gameState.berserkerBonus = 0;
+
+            startPlayerTurn();
+        }
+
+        function startPlayerTurn() {
+            gameState.turnCount++;
+            gameState.shield = 0;
+            gameState.turnMult = +(gameState.pact.startMult + gameState.carryOverMult).toFixed(2);
+            gameState.carryOverMult = 0;
+            gameState.cardsPlayedThisTurn = 0;
+            gameState.reshufflesThisTurn = 0;
+            gameState.usedOncePerTurn = {};
+            gameState.mirrorShardUsed = false;
+            gameState.doubleCastNext = false;
+            gameState.selectedDieIndex = null;
+            gameState.freeRerollUsed = false;
+            gameState.rerolls = 2 + (hasArtifact('cheater_cuff') ? 2 : 0);
+
+            decideEnemyIntent();
+
+            gameState.dice = [];
+            const baseCount = gameState.diceTemplates.length;
+            for (let i = 0; i < baseCount; i++) {
+                rollSingleDieFromTemplate(gameState.diceTemplates[i]);
+            }
+            if (hasArtifact('golden_cup')) {
+                for (let j = 0; j < 2; j++) {
+                    rollSingleDieFromTemplate([
+                        { type: 'num', val: 1 }, { type: 'num', val: 2 }, { type: 'num', val: 3 },
+                        { type: 'num', val: 4 }, { type: 'num', val: 5 }, { type: 'num', val: 6 }
+                    ]);
+                }
+            }
+
+            while (gameState.hand.length < 5) {
+                if (!drawCard(true)) break;
+            }
+
+            SoundFX.diceRoll();
+            renderAll();
+        }
+
+        function decideEnemyIntent() {
+            const e = gameState.enemy;
+            const cycle = gameState.turnCount % 3;
+            if (cycle === 1) {
+                e.intent = { type: 'attack', val: e.atk };
+            } else if (cycle === 2) {
+                e.intent = { type: 'defend_attack', val: Math.floor(e.atk * 0.8), shield: Math.floor(e.atk * 1.2) };
+            } else {
+                e.intent = { type: 'heavy', val: Math.floor(e.atk * 1.45) };
+            }
+        }
+
+        function rollSingleDieFromTemplate(faces) {
+            if (gameState.dice.length >= MAX_DICE_IN_TRAY) {
+                return null;
+            }
+            const face = faces[Math.floor(Math.random() * faces.length)];
+            const dieObj = {
+                id: Math.random().toString(36).substr(2, 9),
+                faces: faces.map(f => ({ ...f })),
+                current: { ...face },
+                used: false,
+                rolling: true
+            };
+            gameState.dice.push(dieObj);
+
+            if (hasArtifact('weighted_die') && (face.val >= 6 || face.type === 'mult')) {
+                gameState.turnMult = +(gameState.turnMult + 0.5).toFixed(2);
+            }
+            return dieObj;
+        }
+
+        function rerollDice() {
+            if (gameState.isTransitioning) return;
+            const hasFreeReroll = hasArtifact('dice_god_eye') && !gameState.freeRerollUsed;
+            if (gameState.rerolls <= 0 && !hasFreeReroll) return;
+
+            const unusedDice = gameState.dice.filter(d => !d.used);
+            if (unusedDice.length === 0) {
+                showToast('振り直せる未使用ダイスがありません！');
+                return;
+            }
+
+            if (hasFreeReroll) {
+                gameState.freeRerollUsed = true;
+                showToast('🧐 千里眼のモノクル：無料振り直し発動！');
+            } else {
+                gameState.rerolls--;
+            }
+            SoundFX.diceRoll();
+
+            let targets = [];
+            if (gameState.selectedDieIndex !== null && !gameState.dice[gameState.selectedDieIndex].used) {
+                targets = [gameState.dice[gameState.selectedDieIndex]];
+            } else {
+                targets = unusedDice;
+            }
+
+            targets.forEach(d => {
+                const newFace = d.faces[Math.floor(Math.random() * d.faces.length)];
+                d.current = { ...newFace };
+                d.rolling = true;
+                if (hasArtifact('weighted_die') && (newFace.val >= 6 || newFace.type === 'mult')) {
+                    gameState.turnMult = +(gameState.turnMult + 0.5).toFixed(2);
+                }
+            });
+
+            if (hasArtifact('cheater_cuff')) {
+                gameState.turnMult = +(gameState.turnMult + 0.4).toFixed(2);
+                showToast('🎩 イカサマ師の袖口：倍率 +0.4x！');
+            }
+
+            renderAll();
+        }
+
+        function selectDie(idx) {
+            if (gameState.isTransitioning) return;
+            const d = gameState.dice[idx];
+            if (!d || d.used) return;
+            SoundFX.select();
+            if (gameState.selectedDieIndex === idx) {
+                gameState.selectedDieIndex = null;
+            } else {
+                gameState.selectedDieIndex = idx;
+            }
+            renderAll();
+        }
+
+        function clearSelectedDie() {
+            if (gameState.isTransitioning || gameState.selectedDieIndex === null) return;
+            SoundFX.select();
+            gameState.selectedDieIndex = null;
+            renderAll();
+        }
+
+        /* =====================================================================
+         * 6. シナジー・総合倍率・ダメージ計算エンジン
+         * ===================================================================== */
+        function getUnusedDiceSum(state = gameState) {
+            if (!state || !state.dice) return 0;
+            return state.dice
+                .filter(d => !d.used)
+                .reduce((acc, d) => acc + (d.current.type === 'mult' ? 6 : d.current.val), 0);
+        }
+
+        function getEffectiveDieValue(die, state = gameState) {
+            if (!die) return 4 + (state ? state.berserkerBonus : 0);
+            let val = die.current.type === 'mult' ? 6 : die.current.val;
+            if (hasArtifact('odd_fanatic') && die.current.type === 'num' && val % 2 === 1) {
+                val += 10;
+            }
+            if (state && state.berserkerBonus > 0) {
+                val += state.berserkerBonus;
+            }
+            return val;
+        }
+
+        function getMultiplierDetails(die = null, state = gameState) {
+            if (!state || !state.dice) return { total: 1.0, tags: [] };
+            let mult = state.turnMult;
+            const tags = [`基礎 ×${formatMult(state.turnMult)}`];
+
+            if (die && die.current.type === 'mult') {
+                const faceFactor = hasArtifact('royal_scepter') ? Math.pow(die.current.val, 2) : die.current.val;
+                mult *= faceFactor;
+                tags.push(`倍率面 ×${faceFactor}`);
+            }
+
+            if (hasArtifact('demon_doubles')) {
+                const counts = {};
+                let duplicatePairs = 0;
+                state.dice.forEach(d => {
+                    const key = `${d.current.type}_${d.current.val}`;
+                    counts[key] = (counts[key] || 0) + 1;
+                    if (counts[key] > 1) duplicatePairs++;
+                });
+                if (duplicatePairs > 0) {
+                    const factor = Math.pow(2, duplicatePairs);
+                    mult *= factor;
+                    tags.push(`😈ゾロ目 ×${formatMult(factor)}`);
+                }
+            }
+
+            if (hasArtifact('inflation_gear') && state.cardsPlayedThisTurn > 0) {
+                const factor = Math.pow(1.5, state.cardsPlayedThisTurn);
+                mult *= factor;
+                tags.push(`⚙️歯車 ×${formatMult(factor)}`);
+            }
+
+            if (hasArtifact('scale_of_ruin') && state.hp <= state.maxHp * 0.5) {
+                mult *= 4;
+                tags.push(`⚖️背水 ×4`);
+            }
+
+            if (hasArtifact('crown_of_greed') && state.gold >= 10) {
+                const stacks = Math.floor(state.gold / 10);
+                const factor = 1 + stacks * 0.15;
+                mult *= factor;
+                tags.push(`👑王冠 ×${factor.toFixed(1)}`);
+            }
+
+            if (hasArtifact('infinity_engine') && state.turnMult > 10) {
+                mult *= 3;
+                tags.push(`♾️無限機関 ×3`);
+            }
+
+            return { total: mult, tags };
+        }
+
+        function getTotalMultiplier(die = null, state = gameState) {
+            return getMultiplierDetails(die, state).total;
+        }
+
+        function calcAttackDamage(basePower, effVal, totalMult, state = gameState) {
+            let dmg = basePower * totalMult;
+            if (hasArtifact('golden_lead') && effVal >= 6) {
+                dmg *= 2.5;
+            }
+            return Math.floor(dmg);
+        }
+
+        /* =====================================================================
+         * 7. カード使用＆エフェクト実行
+         * ===================================================================== */
+        function getCardBlockReason(card) {
+            if (card.oncePerTurn && gameState.usedOncePerTurn[card.id]) {
+                return 'このターンは既に使用済み（1ターン1回制限）！';
+            }
+            if (card.id === 'blood_die' && gameState.hp <= 5) {
+                return 'HPが6以上ないと「血のダイス」は使えません！';
+            }
+            if (card.id === 'final_gamble' && gameState.hp < 10) {
+                return 'HPが10以上ないと「デッド・オア・アライブ」は使えません！';
+            }
+            if (card.id === 'dice_cloner' && gameState.dice.length >= MAX_DICE_IN_TRAY) {
+                return `ダイストレイが上限（${MAX_DICE_IN_TRAY}個）のため複製できません！`;
+            }
+            return null;
+        }
+
+        function canPlayCardWithDie(card, die) {
+            if (getCardBlockReason(card)) return false;
+            if (card.req === 'none') return true;
+            if (!die || die.used) return false;
+            const val = die.current.type === 'mult' ? 6 : die.current.val;
+            if (card.req === 'any') return true;
+            if (card.req === 'six') return val >= 6 || die.current.type === 'mult';
+            if (card.req === 'even') return val % 2 === 0;
+            return false;
+        }
+
+        function getHandCardId(handItem) {
+            return typeof handItem === 'string' ? handItem : handItem.id;
+        }
+
+        function isHandCardEthereal(handItem) {
+            return typeof handItem === 'object' && !!handItem.ethereal;
+        }
+
+        function hasAnyPlayableAction() {
+            return gameState.hand.some(handItem => {
+                const cardId = getHandCardId(handItem);
+                const card = CARD_DB[cardId];
+                if (!card || getCardBlockReason(card)) return false;
+                if (card.req === 'none') return true;
+                return gameState.dice.some(d => canPlayCardWithDie(card, d));
+            });
+        }
+
+        function playCard(handIndex) {
+            if (gameState.isTransitioning) return;
+            const handItem = gameState.hand[handIndex];
+            if (!handItem) return;
+            const cardId = getHandCardId(handItem);
+            const isEthereal = isHandCardEthereal(handItem);
+            const card = CARD_DB[cardId];
+            if (!card) return;
+
+            const blockReason = getCardBlockReason(card);
+            if (blockReason) {
+                showToast(`⚠️ ${blockReason}`);
+                return;
+            }
+
+            let selectedDie = gameState.selectedDieIndex !== null ? gameState.dice[gameState.selectedDieIndex] : null;
+
+            if (card.req !== 'none') {
+                if (!selectedDie || selectedDie.used) {
+                    const validDice = gameState.dice
+                        .map((d, idx) => ({ d, idx }))
+                        .filter(item => canPlayCardWithDie(card, item.d));
+
+                    if (validDice.length === 1) {
+                        gameState.selectedDieIndex = validDice[0].idx;
+                        selectedDie = validDice[0].d;
+                    } else if (validDice.length > 1) {
+                        showToast(`🎲 まず使うダイスをタップして選択しよう！`);
+                        highlightValidDice(card);
+                        return;
+                    } else {
+                        showToast(`⚠️ 条件(${card.reqLabel})を満たす未使用ダイスがありません！`);
+                        return;
+                    }
+                } else if (!canPlayCardWithDie(card, selectedDie)) {
+                    showToast(`⚠️ このカードは「${card.reqLabel}」が必要です！`);
+                    return;
+                }
+            }
+
+            SoundFX.cardPlay();
+
+            if (card.req !== 'none' && selectedDie) {
+                if (cardId === 'dice_cloner' || cardId === 'loaded_swap') {
+                    // クローン・裏面のすり替えはダイスを消費しない
+                } else if (hasArtifact('mirage_prism') && Math.random() < 0.35) {
+                    showToast('💎 幻影のプリズム：ダイスが消費されずに残った！');
+                } else {
+                    selectedDie.used = true;
+                }
+                gameState.selectedDieIndex = null;
+            }
+
+            if (card.oncePerTurn) {
+                gameState.usedOncePerTurn[cardId] = true;
+            }
+
+            // 手札から一時退避（効果解決が終わるまで捨て札へ送らない）
+            gameState.hand.splice(handIndex, 1);
+            gameState.cardsPlayedThisTurn++;
+
+            const castTimes = (gameState.doubleCastNext && cardId !== 'god_hand') ? 2 : 1;
+            if (castTimes === 2) {
+                gameState.doubleCastNext = false;
+                showToast('✨ ゴッドハンド発動！カード効果が2連続で炸裂！');
+            }
+
+            for (let c = 0; c < castTimes; c++) {
+                if (gameState.enemy.hp <= 0) break;
+                if (c > 0 && cardId === 'blood_die' && gameState.hp <= 5) {
+                    showToast('🩸 HP不足のため2回目の発動が中断された！');
+                    break;
+                }
+                if (c > 0 && cardId === 'final_gamble' && gameState.hp < 10) {
+                    showToast('💀 HP不足のため2回目の発動が中断された！');
+                    break;
+                }
+                if (c > 0 && cardId === 'dice_cloner' && gameState.dice.length >= MAX_DICE_IN_TRAY) {
+                    showToast(`🎲 ダイス上限（${MAX_DICE_IN_TRAY}個）のため2回目の複製は中断！`);
+                    break;
+                }
+                executeSingleCardEffect(cardId, selectedDie);
+            }
+
+            if (hasArtifact('berserker_chip')) {
+                gameState.berserkerBonus += 2;
+            }
+            if (hasArtifact('mirror_shard') && !gameState.mirrorShardUsed && !card.oncePerTurn) {
+                gameState.mirrorShardUsed = true;
+                if (gameState.hand.length < 8) {
+                    gameState.hand.push({ id: cardId, ethereal: true });
+                    showToast(`🪞 万華鏡の欠片：【${card.name}】の✨幻影を手札に複製！`);
+                }
+            }
+            if (hasArtifact('lucky_seven_charm') && gameState.cardsPlayedThisTurn % 3 === 0) {
+                const addedDie = rollSingleDieFromTemplate([
+                    { type: 'num', val: 1 }, { type: 'num', val: 2 }, { type: 'num', val: 3 },
+                    { type: 'num', val: 4 }, { type: 'num', val: 5 }, { type: 'num', val: 6 }
+                ]);
+                const drew = drawCard();
+                if (addedDie && drew) {
+                    showToast('🍀 ラッキーセブン：ダイス+1個 ＆ 1ドロー！');
+                } else if (drew) {
+                    showToast('🍀 ラッキーセブン：1ドロー！（ダイスは上限）');
+                } else if (addedDie) {
+                    showToast('🍀 ラッキーセブン：ダイス+1個！（山札補充上限）');
+                }
+            }
+
+            // 幻影カードは使用後に消滅（捨て札に行かない）
+            if (!isEthereal) {
+                gameState.discardPile.push(cardId);
+            }
+
+            renderAll();
+
+            if (gameState.enemy.hp <= 0) {
+                gameState.isTransitioning = true;
+                setTimeout(handleEnemyDefeated, 450);
+            }
+        }
+
+        function executeSingleCardEffect(cardId, selectedDie) {
+            const effVal = getEffectiveDieValue(selectedDie);
+            const totalMult = getTotalMultiplier(selectedDie);
+
+            switch (cardId) {
+                case 'heavy_strike': {
+                    const dmg = calcAttackDamage(effVal * 5, effVal, totalMult);
+                    dealDamageToEnemy(dmg);
+                    break;
+                }
+                case 'double_up': {
+                    const factor = effVal >= 6 ? 3 : 2;
+                    gameState.turnMult = +(gameState.turnMult * factor).toFixed(2);
+                    SoundFX.buff();
+                    spawnFloatingText(`倍率 ×${factor} UP!`, window.innerWidth / 2, window.innerHeight * 0.4, '#ffd700', 26);
+                    break;
+                }
+                case 'sleight_hand': {
+                    const targets = gameState.dice
+                        .filter(d => !d.used && !(d.current.type === 'num' && d.current.val >= 6))
+                        .sort((a, b) => a.current.val - b.current.val)
+                        .slice(0, 2);
+                    targets.forEach(d => {
+                        d.current = { type: 'num', val: 6 };
+                        d.rolling = true;
+                        if (hasArtifact('weighted_die')) {
+                            gameState.turnMult = +(gameState.turnMult + 0.5).toFixed(2);
+                        }
+                    });
+                    drawCard();
+                    SoundFX.buff();
+                    showToast(`🃏 イカサマ成功！${targets.length}個のダイスを「6」にすり替えた！`);
+                    break;
+                }
+                case 'iron_bluff': {
+                    const sh = Math.floor(effVal * 4 * totalMult);
+                    gameState.shield += sh;
+                    SoundFX.buff();
+                    spawnFloatingText(`🛡️ +${formatNum(sh)}`, window.innerWidth * 0.3, window.innerHeight * 0.45, '#00f3ff', 24);
+                    break;
+                }
+                case 'pair_barrage': {
+                    let hits = 1;
+                    if (selectedDie) {
+                        hits = Math.max(1, gameState.dice.filter(d => d.current.type === selectedDie.current.type && d.current.val === selectedDie.current.val).length);
+                    }
+                    const singleDmg = calcAttackDamage(effVal * 4, effVal, totalMult);
+                    dealDamageToEnemy(singleDmg * hits);
+                    showToast(`⚡ ${hits}連撃ヒット！`);
+                    break;
+                }
+                case 'mirror_trick': {
+                    const copyFace = { ...selectedDie.current };
+                    let converted = 0;
+                    gameState.dice.forEach(d => {
+                        if (d.id !== selectedDie.id) {
+                            d.current = { ...copyFace };
+                            d.rolling = true;
+                            converted++;
+                            if (hasArtifact('weighted_die') && (copyFace.val >= 6 || copyFace.type === 'mult')) {
+                                gameState.turnMult = +(gameState.turnMult + 0.5).toFixed(2);
+                            }
+                        }
+                    });
+                    SoundFX.buff();
+                    showToast(`🪞 鏡写し！他 ${converted} 個のダイスが同じ出目に変化！`);
+                    break;
+                }
+                case 'blood_die': {
+                    gameState.hp -= 5;
+                    gameState.turnMult = +(gameState.turnMult + 1.5).toFixed(2);
+                    let spawned = 0;
+                    for (let k = 0; k < 2; k++) {
+                        const created = rollSingleDieFromTemplate([
+                            { type: 'num', val: 1 }, { type: 'num', val: 2 }, { type: 'num', val: 3 },
+                            { type: 'num', val: 4 }, { type: 'num', val: 5 }, { type: 'num', val: 6 }
+                        ]);
+                        if (created) spawned++;
+                    }
+                    SoundFX.diceRoll();
+                    showToast(`🩸 HP-5の代償でダイス+${spawned}個＆倍率+1.5x！`);
+                    break;
+                }
+                case 'overload': {
+                    const dmg = calcAttackDamage(120 * (effVal / 6), effVal, totalMult);
+                    dealDamageToEnemy(dmg);
+                    break;
+                }
+                case 'hyper_inflation': {
+                    gameState.turnMult = +(gameState.turnMult * 2.5).toFixed(2);
+                    gameState.rerolls += 1;
+                    SoundFX.buff();
+                    spawnFloatingText('HYPER ×2.5!', window.innerWidth / 2, window.innerHeight * 0.4, '#ffd700', 30);
+                    break;
+                }
+                case 'fate_rewrite': {
+                    gameState.dice.forEach(d => {
+                        d.current = { type: 'num', val: 6 };
+                        d.rolling = true;
+                        if (hasArtifact('weighted_die')) {
+                            gameState.turnMult = +(gameState.turnMult + 0.5).toFixed(2);
+                        }
+                    });
+                    gameState.turnMult = +(gameState.turnMult + 1.0).toFixed(2);
+                    SoundFX.win();
+                    showToast('🌌 運命改竄！全ダイスが「6」に書き換わった！');
+                    break;
+                }
+                case 'gold_alchemy': {
+                    const dmg = calcAttackDamage(effVal * 4, effVal, totalMult);
+                    const gainGold = effVal * 3;
+                    gameState.gold += gainGold;
+                    dealDamageToEnemy(dmg);
+                    showToast(`🪙 ${gainGold}G を錬成！`);
+                    break;
+                }
+                case 'underground_verdict': {
+                    const dmg = calcAttackDamage(effVal * 8, effVal, totalMult);
+                    const sh = Math.floor(effVal * 3 * totalMult);
+                    gameState.shield += sh;
+                    dealDamageToEnemy(dmg);
+                    break;
+                }
+                case 'exponential_dice': {
+                    const factor = +(1 + effVal * 0.35).toFixed(2);
+                    gameState.turnMult = +(gameState.turnMult * factor).toFixed(2);
+                    drawCard();
+                    SoundFX.buff();
+                    spawnFloatingText(`倍率 ×${factor}!`, window.innerWidth / 2, window.innerHeight * 0.4, '#34d399', 26);
+                    break;
+                }
+                case 'dice_cloner': {
+                    if (gameState.dice.length >= MAX_DICE_IN_TRAY) {
+                        showToast(`🎲 ダイストレイが上限（${MAX_DICE_IN_TRAY}個）です！`);
+                        break;
+                    }
+                    const clonedFace = { ...selectedDie.current };
+                    gameState.dice.push({
+                        id: Math.random().toString(36).substr(2, 9),
+                        faces: selectedDie.faces.map(f => ({ ...f })),
+                        current: clonedFace,
+                        used: false,
+                        rolling: true
+                    });
+                    if (hasArtifact('weighted_die') && (clonedFace.val >= 6 || clonedFace.type === 'mult')) {
+                        gameState.turnMult = +(gameState.turnMult + 0.5).toFixed(2);
+                    }
+                    SoundFX.diceRoll();
+                    showToast('🧬 違法複製！同じ出目のダイスを増殖させた！');
+                    break;
+                }
+                case 'execution_666': {
+                    const highCount = Math.max(1, gameState.dice.filter(d => d.current.val >= 6 || d.current.type === 'mult').length);
+                    const dmg = calcAttackDamage(160 * highCount, effVal, totalMult);
+                    dealDamageToEnemy(dmg);
+                    break;
+                }
+                case 'all_in_gamble': {
+                    const sh = gameState.shield;
+                    gameState.shield = 0;
+                    gameState.turnMult = +(gameState.turnMult * 2).toFixed(2);
+                    const newMult = getTotalMultiplier(null);
+                    const dmg = calcAttackDamage(Math.max(30, sh * 3), 6, newMult);
+                    dealDamageToEnemy(dmg);
+                    showToast('🔥 オールイン！全シールドを火力に変換！');
+                    break;
+                }
+                case 'vampire_bet': {
+                    const dmg = calcAttackDamage(effVal * 6, effVal, totalMult);
+                    dealDamageToEnemy(dmg);
+                    const heal = Math.min(25, Math.max(5, Math.floor(dmg * 0.1)));
+                    gameState.hp = Math.min(gameState.maxHp, gameState.hp + heal);
+                    spawnFloatingText(`+${heal} HP`, window.innerWidth * 0.25, window.innerHeight * 0.25, '#34d399', 22);
+                    break;
+                }
+                case 'royal_straight': {
+                    const unused = gameState.dice.filter(d => !d.used);
+                    const vals = unused.map(d => `${d.current.type}_${d.current.val}`);
+                    const uniqueSize = new Set(vals).size;
+                    if (unused.length >= 3 && uniqueSize === unused.length) {
+                        gameState.turnMult = +(gameState.turnMult * 5).toFixed(2);
+                        SoundFX.win();
+                        spawnFloatingText('ROYAL ×5!!', window.innerWidth / 2, window.innerHeight * 0.38, '#ffd700', 34);
+                    } else {
+                        const pairs = Math.max(1, vals.length - uniqueSize);
+                        const bonus = +(pairs * 1.5).toFixed(1);
+                        gameState.turnMult = +(gameState.turnMult + bonus).toFixed(2);
+                        SoundFX.buff();
+                        showToast(`🃏 重複ボーナス：倍率 +${bonus}x！`);
+                    }
+                    break;
+                }
+                case 'chaos_roulette': {
+                    const handCount = Math.max(5, gameState.hand.length + 1);
+                    gameState.hand.forEach(item => {
+                        if (!isHandCardEthereal(item)) {
+                            gameState.discardPile.push(getHandCardId(item));
+                        }
+                    });
+                    gameState.hand = [];
+                    for (let i = 0; i < handCount; i++) {
+                        if (!drawCard()) break;
+                    }
+                    gameState.dice.filter(d => !d.used).forEach(d => {
+                        const nf = d.faces[Math.floor(Math.random() * d.faces.length)];
+                        d.current = { ...nf };
+                        d.rolling = true;
+                    });
+                    gameState.turnMult = +(gameState.turnMult * 1.8).toFixed(2);
+                    SoundFX.diceRoll();
+                    showToast('🎡 カオス・ルーレット！手札＆ダイス総入れ替え＋倍率×1.8！');
+                    break;
+                }
+                case 'god_hand': {
+                    gameState.doubleCastNext = true;
+                    SoundFX.win();
+                    spawnFloatingText('GOD HAND READY!', window.innerWidth / 2, window.innerHeight * 0.38, '#ffd700', 28);
+                    break;
+                }
+                case 'over_limit': {
+                    const spend = Math.floor(gameState.shield * 0.5);
+                    gameState.shield -= spend;
+                    const dmg = calcAttackDamage(Math.max(20, spend * effVal), effVal, totalMult);
+                    dealDamageToEnemy(dmg);
+                    showToast(`💥 リミットブレイク！シールド ${formatNum(spend)} を火力変換！`);
+                    break;
+                }
+                case 'lucky_seven': {
+                    const sum = getUnusedDiceSum();
+                    if (sum > 0 && sum % 7 === 0) {
+                        gameState.turnMult = +(gameState.turnMult * 7).toFixed(2);
+                        SoundFX.win();
+                        spawnFloatingText('JACKPOT 777 ×7!!', window.innerWidth / 2, window.innerHeight * 0.36, '#ffd700', 36);
+                    } else {
+                        gameState.turnMult = +(gameState.turnMult + 1.0).toFixed(2);
+                        SoundFX.buff();
+                        showToast(`🎰 合計 ${sum}（7の倍数ならず！倍率 +1.0x）`);
+                    }
+                    break;
+                }
+                case 'loaded_swap': {
+                    selectedDie.current = { type: 'mult', val: 2 };
+                    selectedDie.rolling = true;
+                    if (hasArtifact('weighted_die')) {
+                        gameState.turnMult = +(gameState.turnMult + 0.5).toFixed(2);
+                    }
+                    drawCard();
+                    SoundFX.buff();
+                    showToast('🃏 裏面のすり替え！ダイスが「×2倍率面」に変化＋1ドロー！');
+                    break;
+                }
+                case 'final_gamble': {
+                    const cost = Math.floor(gameState.hp * 0.5);
+                    gameState.hp = Math.max(1, gameState.hp - cost);
+                    gameState.turnMult = +(gameState.turnMult * 4).toFixed(2);
+                    SoundFX.win();
+                    spawnFloatingText('DEAD OR ALIVE ×4!!', window.innerWidth / 2, window.innerHeight * 0.38, '#ff2a55', 32);
+                    break;
+                }
+            }
+        }
+
+        function dealDamageToEnemy(rawDmg) {
+            const e = gameState.enemy;
+            if (!e) return;
+
+            if (rawDmg > gameState.maxSingleDmg) {
+                gameState.maxSingleDmg = rawDmg;
+            }
+            gameState.totalDmgDealt += rawDmg;
+
+            if (hasArtifact('tax_collector') && rawDmg > 0 && gameState.taxGoldThisBattle < TAX_COLLECTOR_CAP_PER_BATTLE) {
+                const rawTax = rawDmg >= 10000 ? 15 : 5;
+                const actualTax = Math.min(rawTax, TAX_COLLECTOR_CAP_PER_BATTLE - gameState.taxGoldThisBattle);
+                gameState.taxGoldThisBattle += actualTax;
+                gameState.gold += actualTax;
+                if (gameState.taxGoldThisBattle >= TAX_COLLECTOR_CAP_PER_BATTLE) {
+                    showToast(`💰 徴収人：この戦闘の徴収上限（+${TAX_COLLECTOR_CAP_PER_BATTLE}G）に到達！`);
+                }
+            }
+
+            let remaining = rawDmg;
+            if (e.shield > 0) {
+                const absorbed = Math.min(e.shield, remaining);
+                e.shield -= absorbed;
+                remaining -= absorbed;
+            }
+            e.hp = Math.max(0, e.hp - remaining);
+
+            const isHuge = rawDmg >= 100;
+            const isInsane = rawDmg >= 10000;
+            SoundFX.hit(isHuge);
+
+            const gameEl = document.getElementById('game-screen');
+            gameEl.classList.remove('shake-light', 'shake-heavy');
+            void gameEl.offsetWidth;
+            gameEl.classList.add(isHuge ? 'shake-heavy' : 'shake-light');
+
+            const enemyRect = document.getElementById('enemy-panel').getBoundingClientRect();
+            const x = enemyRect.left + enemyRect.width * (0.4 + Math.random() * 0.2);
+            const y = enemyRect.top + enemyRect.height * 0.4;
+
+            let color = '#ffffff';
+            let size = 26;
+            if (isInsane) { color = '#ffd700'; size = 42; }
+            else if (rawDmg >= 1000) { color = '#ff2a55'; size = 36; }
+            else if (isHuge) { color = '#00f3ff'; size = 30; }
+
+            spawnFloatingText(`-${formatNum(rawDmg)}!`, x, y, color, size);
+        }
+
+        function endPlayerTurn() {
+            if (gameState.isTransitioning) return;
+            if (!gameState.enemy || gameState.enemy.hp <= 0) return;
+
+            gameState.isTransitioning = true;
+
+            if (hasArtifact('abyssal_ledger')) {
+                const unusedCount = gameState.dice.filter(d => !d.used).length;
+                if (unusedCount > 0) {
+                    gameState.carryOverMult = +(unusedCount * 0.8).toFixed(2);
+                }
+            }
+
+            gameState.hand.forEach(item => {
+                if (!isHandCardEthereal(item)) {
+                    gameState.discardPile.push(getHandCardId(item));
+                }
+            });
+            gameState.hand = [];
+
+            const e = gameState.enemy;
+            const intent = e.intent;
+            let incomingDmg = 0;
+
+            if (intent.type === 'attack' || intent.type === 'heavy') {
+                incomingDmg = intent.val;
+            } else if (intent.type === 'defend_attack') {
+                e.shield += intent.shield;
+                incomingDmg = intent.val;
+            }
+
+            if (incomingDmg > 0) {
+                let actualDmg = incomingDmg;
+                if (gameState.shield > 0) {
+                    const blocked = Math.min(gameState.shield, actualDmg);
+                    gameState.shield -= blocked;
+                    actualDmg -= blocked;
+                }
+                gameState.hp = Math.max(0, gameState.hp - actualDmg);
+
+                SoundFX.hit(actualDmg >= 20);
+                spawnFloatingText(
+                    actualDmg > 0 ? `-${actualDmg} HP` : 'BLOCKED!',
+                    window.innerWidth * 0.25,
+                    window.innerHeight * 0.2,
+                    actualDmg > 0 ? '#ff2a55' : '#00f3ff',
+                    26
+                );
+            }
+
+            renderAll();
+
+            if (gameState.hp <= 0) {
+                setTimeout(() => showResultScreen('defeat'), 500);
+            } else {
+                setTimeout(() => {
+                    gameState.isTransitioning = false;
+                    startPlayerTurn();
+                }, 450);
+            }
+        }
+
+        function drawCard(isTurnStart = false) {
+            if (gameState.drawPile.length === 0) {
+                if (gameState.discardPile.length === 0) return false;
+                if (!isTurnStart) {
+                    if (gameState.reshufflesThisTurn >= MAX_RESHUFFLES_PER_TURN) {
+                        showToast(`🃏 このターンの山札補充上限（${MAX_RESHUFFLES_PER_TURN}回）に到達！`);
+                        return false;
+                    }
+                    gameState.reshufflesThisTurn++;
+                }
+                gameState.drawPile = shuffleArray([...gameState.discardPile]);
+                gameState.discardPile = [];
+            }
+            const nextCard = gameState.drawPile.pop();
+            gameState.hand.push({ id: nextCard, ethereal: false });
+            return true;
+        }
+
+        /* =====================================================================
+         * 8. 戦闘勝利・報酬＆闇ショップ＆ダイス改造システム
+         * ===================================================================== */
+        function getShopPrice(baseCost) {
+            return hasArtifact('vip_card') ? Math.floor(baseCost * 0.7) : baseCost;
+        }
+
+        function updateRewardHeaderStats() {
+            document.getElementById('reward-hp-display').innerText = `${gameState.hp}/${gameState.maxHp}`;
+            document.getElementById('reward-gold-display').innerText = gameState.gold;
+            document.getElementById('reward-deck-display').innerText = gameState.deck.length;
+            document.getElementById('reward-art-display').innerText = `${gameState.artifacts.length}/${ARTIFACT_DB.length}`;
+
+            const deckFull = gameState.deck.length >= MAX_DECK_SIZE;
+            const cardBtn = document.getElementById('btn-reward-cat-card');
+            const cardDesc = document.getElementById('reward-card-cat-desc');
+            const cardCta = document.getElementById('reward-card-cat-cta');
+            if (deckFull) {
+                cardBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                cardDesc.innerText = `デッキ上限（${MAX_DECK_SIZE}枚）に到達中！闇ショップで不要カードを破棄すると再び獲得可能。`;
+                cardCta.innerText = `🚫 デッキ上限 (${MAX_DECK_SIZE}/${MAX_DECK_SIZE}枚)`;
+            } else {
+                cardBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                cardDesc.innerText = `全24種のカードから提示された3枚のうち1枚を獲得（同名最大${MAX_SAME_CARD_COPIES}枚）。`;
+                cardCta.innerText = '無料報酬を選ぶ ➔';
+            }
+
+            const allOwned = ARTIFACT_DB.every(a => hasArtifact(a.id));
+            const catDesc = document.getElementById('reward-art-cat-desc');
+            const catCta = document.getElementById('reward-art-cat-cta');
+            if (allOwned) {
+                catDesc.innerText = `全${ARTIFACT_DB.length}種コンプリート済！選択すると重複ボーナス【+80G】に変換！`;
+                catCta.innerText = '換金報酬を選ぶ (+80G) ➔';
+            } else {
+                catDesc.innerText = `未所持の遺物を優先して3択提示（所持済 ${gameState.artifacts.length}/${ARTIFACT_DB.length}種）。`;
+                catCta.innerText = '無料報酬を選ぶ ➔';
+            }
+
+            // エンドレスモードなら報酬画面に「勝ち逃げ」ボタンを表示
+            const cashoutWrap = document.getElementById('reward-cashout-wrap');
+            if (gameState.endless) cashoutWrap.classList.remove('hidden');
+            else cashoutWrap.classList.add('hidden');
+        }
+
+        function handleEnemyDefeated() {
+            SoundFX.win();
+            const goldReward = gameState.enemy.gold;
+            gameState.gold += goldReward;
+
+            if (gameState.floor === 20 && !gameState.endless) {
+                showResultScreen('victory');
+                return;
+            }
+
+            if (hasArtifact('blood_chalice') && !isHpLocked()) {
+                gameState.maxHp += 5;
+            }
+            const baseHeal = 20 + (hasArtifact('blood_chalice') ? 15 : 0);
+            const healed = Math.min(gameState.maxHp - gameState.hp, baseHeal);
+            gameState.hp += healed;
+
+            document.getElementById('reward-heal-msg').innerText = `❤️ 休息で HP +${healed} 回復 ＆ 賞金 +${goldReward}G を獲得！`;
+            updateRewardHeaderStats();
+
+            gameState.isTransitioning = false;
+            renderAll();
+            backToRewardCategories();
+            toggleModal('reward-modal', true);
+        }
+
+        function backToRewardCategories() {
+            updateRewardHeaderStats();
+            document.getElementById('reward-step-1').classList.remove('hidden');
+            document.getElementById('reward-sub-area').classList.add('hidden');
+        }
+
+        function openRewardSub(category) {
+            if (category === 'card' && gameState.deck.length >= MAX_DECK_SIZE) {
+                showToast(`⚠️ デッキ上限（${MAX_DECK_SIZE}枚）のため追加できません！闇ショップでカードを破棄しよう`);
+                return;
+            }
+            SoundFX.select();
+            updateRewardHeaderStats();
+            document.getElementById('reward-step-1').classList.add('hidden');
+            const subArea = document.getElementById('reward-sub-area');
+            const titleEl = document.getElementById('reward-sub-title');
+            const contentEl = document.getElementById('reward-sub-content');
+            subArea.classList.remove('hidden');
+            contentEl.innerHTML = '';
+
+            if (category === 'card') {
+                titleEl.innerText = `🃏 追加するスキルカードを1枚選択（現在 ${gameState.deck.length}/${MAX_DECK_SIZE}枚）`;
+                const pool = Object.keys(CARD_DB).filter(cId => {
+                    return gameState.deck.filter(id => id === cId).length < MAX_SAME_CARD_COPIES;
+                });
+                const choices = shuffleArray(pool.length > 0 ? pool : Object.keys(CARD_DB)).slice(0, 3);
+
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 sm:grid-cols-3 gap-3';
+
+                choices.forEach(cId => {
+                    const card = CARD_DB[cId];
+                    const ownedCount = gameState.deck.filter(id => id === cId).length;
+                    const isCapped = ownedCount >= MAX_SAME_CARD_COPIES;
+                    const btn = document.createElement('button');
+                    btn.className = `p-4 rounded-2xl bg-[#181729] hover:bg-[#23213b] border-2 ${card.color} text-left flex flex-col justify-between transition`;
+                    btn.innerHTML = `
+                        <div>
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${card.badgeColor}">${card.reqLabel}</span>
+                                <span class="text-[10px] font-bold text-gray-400">所持: ${ownedCount}/${MAX_SAME_CARD_COPIES}枚</span>
+                            </div>
+                            <div class="font-black text-white text-base mt-1.5">${card.name}</div>
+                            <p class="text-xs text-gray-300 mt-1.5 leading-relaxed">${card.desc(6, 1, null)}</p>
+                        </div>
+                        <div class="mt-3 text-xs font-bold ${isCapped ? 'text-yellow-300' : 'text-cyan-300'}">
+                            ${isCapped ? '🪙 換金する (+50G) ➔' : 'デッキに加える ➔'}
+                        </div>
+                    `;
+                    btn.onclick = () => {
+                        if (ownedCount < MAX_SAME_CARD_COPIES && gameState.deck.length < MAX_DECK_SIZE) {
+                            gameState.deck.push(cId);
+                        } else {
+                            gameState.gold += 50;
+                            showToast('🪙 上限のため +50G に変換した！');
+                        }
+                        SoundFX.buff();
+                        proceedToNextFloor();
+                    };
+                    grid.appendChild(btn);
+                });
+                contentEl.appendChild(grid);
+
+            } else if (category === 'artifact') {
+                titleEl.innerText = '🏺 獲得するイカサマ遺物を1つ選択（無料報酬）';
+                const unowned = ARTIFACT_DB.filter(a => !hasArtifact(a.id));
+                const choices = shuffleArray(unowned.length > 0 ? unowned : ARTIFACT_DB).slice(0, 3);
+
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 sm:grid-cols-3 gap-3';
+
+                choices.forEach(art => {
+                    const alreadyOwned = hasArtifact(art.id);
+                    const btn = document.createElement('button');
+                    btn.className = `p-4 rounded-2xl bg-[#1c192e] hover:bg-[#272340] border-2 ${alreadyOwned ? 'border-yellow-500/70' : 'border-purple-500/60'} text-left flex flex-col justify-between transition`;
+                    btn.innerHTML = `
+                        <div>
+                            <div class="flex items-center justify-between gap-1 mb-1.5">
+                                <span class="text-3xl">${art.icon}</span>
+                                ${alreadyOwned
+                                    ? '<span class="px-2 py-0.5 rounded bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-[10px] font-black">所持済：+80Gに変換</span>'
+                                    : '<span class="px-2 py-0.5 rounded bg-purple-950 border border-purple-400/50 text-purple-200 text-[10px] font-bold">NEW!</span>'
+                                }
+                            </div>
+                            <div class="font-black ${alreadyOwned ? 'text-yellow-300' : 'text-purple-300'} text-base">${art.name}</div>
+                            <p class="text-xs text-gray-300 mt-1 leading-relaxed">${art.desc}</p>
+                        </div>
+                        <div class="mt-3 text-xs font-bold ${alreadyOwned ? 'text-yellow-300' : 'text-purple-300'}">
+                            ${alreadyOwned ? '🪙 換金する (+80G) ➔' : '装備する ➔'}
+                        </div>
+                    `;
+                    btn.onclick = () => {
+                        if (!alreadyOwned) {
+                            gameState.artifacts.push(art);
+                            if (art.id === 'berserker_chip' && !isHpLocked()) {
+                                gameState.maxHp += 20;
+                                gameState.hp += 20;
+                            }
+                        } else {
+                            gameState.gold += 80;
+                            showToast('🪙 重複遺物を +80G に変換した！');
+                        }
+                        SoundFX.buff();
+                        proceedToNextFloor();
+                    };
+                    grid.appendChild(btn);
+                });
+                contentEl.appendChild(grid);
+
+            } else if (category === 'dice') {
+                titleEl.innerText = '🎲 違法改造するダイスを選択（無料報酬）';
+                const diceGrid = document.createElement('div');
+                diceGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2.5';
+
+                gameState.diceTemplates.forEach((faces, dIdx) => {
+                    const cardBtn = document.createElement('button');
+                    cardBtn.className = 'p-3 rounded-xl bg-[#1a182b] hover:bg-[#25223d] border border-yellow-500/40 text-left flex items-center justify-between transition';
+                    const facesHtml = faces.map(f => formatFaceBadge(f)).join('');
+                    cardBtn.innerHTML = `
+                        <div>
+                            <div class="text-xs font-black text-yellow-300 mb-1">ダイス #${dIdx + 1}</div>
+                            <div class="flex gap-1 flex-wrap">${facesHtml}</div>
+                        </div>
+                        <span class="text-xs font-bold text-cyan-300">改造 ➔</span>
+                    `;
+                    cardBtn.onclick = () => showDiceSurgeryOptions(dIdx);
+                    diceGrid.appendChild(cardBtn);
+                });
+                contentEl.appendChild(diceGrid);
+
+            } else if (category === 'shop') {
+                const vipNote = hasArtifact('vip_card') ? '【💳VIP 30%OFF適用中】' : '';
+                titleEl.innerText = `💰 裏カジノの闇ショップ ${vipNote}（所持金: ${gameState.gold}G）`;
+                const shopItems = [
+                    {
+                        name: '❤️ 闇医者の緊急治療',
+                        desc: isHpLocked() ? 'HPを全回復する（※背水の陣契約のため最大HP40固定）。' : '最大HP+10 ＆ HPを全回復する。',
+                        cost: getShopPrice(40),
+                        disabled: isHpLocked() && gameState.hp >= gameState.maxHp,
+                        reason: 'HP満タン (40固定)',
+                        buy: () => {
+                            if (!isHpLocked()) {
+                                gameState.maxHp += 10;
+                            }
+                            gameState.hp = gameState.maxHp;
+                            showToast(isHpLocked() ? '❤️ HP全回復！（背水の陣により最大HP40固定）' : '❤️ 最大HP+10 ＆ HP全回復！');
+                        }
+                    },
+                    {
+                        name: '🎲 違法ダイス枠増設（現在 ' + gameState.diceTemplates.length + '/8個）',
+                        desc: '初期ダイスを1個追加する！（最大8個まで増設可能）',
+                        cost: getShopPrice(90),
+                        disabled: gameState.diceTemplates.length >= 8,
+                        reason: '上限達成 (8/8)',
+                        buy: () => {
+                            gameState.diceTemplates.push([
+                                { type: 'num', val: 2 }, { type: 'num', val: 3 }, { type: 'num', val: 4 },
+                                { type: 'num', val: 5 }, { type: 'num', val: 6 }, { type: 'num', val: 6 }
+                            ]);
+                            showToast('🎲 ダイス枠が増設された！');
+                        }
+                    },
+                    {
+                        name: '🔥 不要カード1枚破棄（現在 ' + gameState.deck.length + '枚）',
+                        desc: 'デッキ内の好きなカードを1枚選んで消去（最小4枚まで）。',
+                        cost: getShopPrice(50),
+                        disabled: gameState.deck.length <= 4,
+                        reason: '最小枚数 (4枚)',
+                        buy: () => {
+                            openRemoveCardShop();
+                        }
+                    },
+                    {
+                        name: '👑 ランダム遺物ガチャ',
+                        desc: '未所持のイカサマ遺物をランダムで1つ獲得する！',
+                        cost: getShopPrice(120),
+                        disabled: ARTIFACT_DB.every(a => hasArtifact(a.id)),
+                        reason: `全${ARTIFACT_DB.length}種コンプ済`,
+                        buy: () => {
+                            const unowned = ARTIFACT_DB.filter(a => !hasArtifact(a.id));
+                            if (unowned.length > 0) {
+                                const picked = unowned[Math.floor(Math.random() * unowned.length)];
+                                gameState.artifacts.push(picked);
+                                if (picked.id === 'berserker_chip' && !isHpLocked()) {
+                                    gameState.maxHp += 20;
+                                    gameState.hp += 20;
+                                }
+                                showToast(`🏺 遺物【${picked.name}】を手に入れた！`);
+                            }
+                        }
+                    }
+                ];
+
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2.5';
+
+                shopItems.forEach(item => {
+                    const canAfford = gameState.gold >= item.cost && !item.disabled;
+                    const statusLabel = item.disabled ? item.reason : (gameState.gold < item.cost ? 'ゴールド不足' : `🪙 ${item.cost}G`);
+                    const btn = document.createElement('button');
+                    btn.className = `p-3.5 rounded-xl bg-[#1a182b] border ${canAfford ? 'border-amber-400/60 hover:bg-[#272440]' : 'border-gray-700 opacity-50 cursor-not-allowed'} text-left flex flex-col justify-between transition`;
+                    btn.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-center gap-2">
+                                <span class="font-black text-white text-sm">${item.name}</span>
+                                <span class="px-2 py-0.5 rounded ${canAfford ? 'bg-yellow-500/20 text-yellow-300' : 'bg-gray-800 text-gray-400'} font-black text-xs shrink-0">${statusLabel}</span>
+                            </div>
+                            <p class="text-xs text-gray-300 mt-1">${item.desc}</p>
+                        </div>
+                    `;
+                    btn.onclick = () => {
+                        if (!canAfford) return;
+                        gameState.gold -= item.cost;
+                        updateRewardHeaderStats();
+                        SoundFX.win();
+                        item.buy();
+                        if (item.name.indexOf('破棄') === -1) {
+                            openRewardSub('shop');
+                        }
+                    };
+                    grid.appendChild(btn);
+                });
+                contentEl.appendChild(grid);
+            }
+        }
+
+        function openRemoveCardShop() {
+            const titleEl = document.getElementById('reward-sub-title');
+            const contentEl = document.getElementById('reward-sub-content');
+            titleEl.innerText = '🔥 破棄するカードを1枚選択';
+            contentEl.innerHTML = '';
+
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-2 sm:grid-cols-3 gap-2';
+
+            gameState.deck.forEach((cId, idx) => {
+                const c = CARD_DB[cId];
+                const btn = document.createElement('button');
+                btn.className = `p-3 rounded-xl bg-[#181629] hover:bg-rose-950/60 border ${c.color} text-left transition`;
+                btn.innerHTML = `
+                    <div class="font-black text-white text-xs sm:text-sm">${c.name}</div>
+                    <p class="text-[11px] text-gray-400 mt-1 line-clamp-2">${c.desc(6, 1, null)}</p>
+                    <div class="mt-2 text-[10px] font-bold text-rose-400">🗑️ 削除する</div>
+                `;
+                btn.onclick = () => {
+                    gameState.deck.splice(idx, 1);
+                    updateRewardHeaderStats();
+                    SoundFX.hit(false);
+                    showToast(`🗑️ 【${c.name}】をデッキから削除した！`);
+                    openRewardSub('shop');
+                };
+                grid.appendChild(btn);
+            });
+            contentEl.appendChild(grid);
+        }
+
+        function showDiceSurgeryOptions(dieIdx) {
+            SoundFX.select();
+            const titleEl = document.getElementById('reward-sub-title');
+            const contentEl = document.getElementById('reward-sub-content');
+            titleEl.innerText = `🔧 ダイス #${dieIdx + 1} に施す違法改造を選択`;
+            contentEl.innerHTML = '';
+
+            const surgeries = [
+                {
+                    name: '全面「6」のイカサマサイコロ化',
+                    desc: 'このダイスの6面すべてを「6」に書き換える！（ゾロ目・断罪の666最強パーツ）',
+                    apply: (faces) => faces.map(() => ({ type: 'num', val: 6 }))
+                },
+                {
+                    name: '黄金の倍率面「×2」を2面に刻印',
+                    desc: '最も低い2つの面を、カード効果を倍増させる「×2面」に改造する！',
+                    apply: (faces) => {
+                        const copy = faces.map(f => ({ ...f })).sort((a, b) => a.val - b.val);
+                        copy[0] = { type: 'mult', val: 2 };
+                        copy[1] = { type: 'mult', val: 2 };
+                        return copy;
+                    }
+                },
+                {
+                    name: '極限の倍率面「×3」を1面に刻印',
+                    desc: '最も低い1面を、ダメージを3倍（覇王の王笏なら9倍！）にする「×3面」に改造！',
+                    apply: (faces) => {
+                        const copy = faces.map(f => ({ ...f })).sort((a, b) => a.val - b.val);
+                        copy[0] = { type: 'mult', val: 3 };
+                        return copy;
+                    }
+                },
+                {
+                    name: '禁断の数値「12」を2面に刻印',
+                    desc: '最も低い2つの面を、規格外の出目「12」に書き換える！',
+                    apply: (faces) => {
+                        const copy = faces.map(f => ({ ...f })).sort((a, b) => a.val - b.val);
+                        copy[0] = { type: 'num', val: 12 };
+                        copy[1] = { type: 'num', val: 12 };
+                        return copy;
+                    }
+                }
+            ];
+
+            const list = document.createElement('div');
+            list.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2.5';
+
+            surgeries.forEach(s => {
+                const btn = document.createElement('button');
+                btn.className = 'p-3.5 rounded-xl bg-[#1c1a30] hover:bg-[#292645] border border-cyan-500/50 text-left transition';
+                btn.innerHTML = `
+                    <div class="font-black text-yellow-300 text-sm">${s.name}</div>
+                    <p class="text-xs text-gray-300 mt-1">${s.desc}</p>
+                `;
+                btn.onclick = () => {
+                    gameState.diceTemplates[dieIdx] = s.apply(gameState.diceTemplates[dieIdx]);
+                    SoundFX.win();
+                    proceedToNextFloor();
+                };
+                list.appendChild(btn);
+            });
+
+            contentEl.appendChild(list);
+        }
+
+        function proceedToNextFloor() {
+            toggleModal('reward-modal', false);
+            setupFloor(gameState.floor + 1);
+        }
+
+        function showResultScreen(outcome) {
+            // outcome: 'victory' | 'cashout' | 'defeat'
+            document.getElementById('game-screen').classList.add('hidden');
+            const res = document.getElementById('result-screen');
+            res.classList.remove('hidden');
+
+            const badge = document.getElementById('result-badge');
+            const title = document.getElementById('result-title');
+            const desc = document.getElementById('result-desc');
+            const endlessBtn = document.getElementById('btn-endless-mode');
+            const newRecBanner = document.getElementById('new-record-banner');
+
+            // 自己ベスト更新チェック
+            const rec = loadRecords();
+            let isNewRecord = false;
+            if (gameState.floor > rec.bestFloor) {
+                rec.bestFloor = gameState.floor;
+                isNewRecord = true;
+            }
+            if (gameState.maxSingleDmg > rec.bestDmg) {
+                rec.bestDmg = gameState.maxSingleDmg;
+                isNewRecord = true;
+            }
+            if (outcome === 'victory') {
+                rec.clears = (rec.clears || 0) + 1;
+            }
+            saveRecords(rec);
+
+            if (isNewRecord) newRecBanner.classList.remove('hidden');
+            else newRecBanner.classList.add('hidden');
+
+            if (outcome === 'victory') {
+                badge.innerText = 'GRAND CHAMPION';
+                badge.className = 'inline-block px-4 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-xs font-black tracking-widest mb-3';
+                title.innerText = '🎉 全20階層・完全制覇！';
+                title.className = 'text-3xl sm:text-4xl font-black text-yellow-400 neon-gold mb-2';
+                desc.innerText = '裏カジノの創造神すらイカサマとインフレ火力で粉砕した！';
+                endlessBtn.classList.remove('hidden');
+            } else if (outcome === 'cashout') {
+                badge.innerText = 'CASINO LEGEND // CASH OUT';
+                badge.className = 'inline-block px-4 py-1 rounded-full bg-amber-500/25 border border-amber-400 text-yellow-300 text-xs font-black tracking-widest mb-3';
+                title.innerText = '🏆 勝ち逃げ生還・戦績確定！';
+                title.className = 'text-3xl sm:text-4xl font-black text-yellow-400 neon-gold mb-2';
+                desc.innerText = '引き際を見極めるのも一流のギャンブラー。莫大な戦果を持ち帰った！';
+                endlessBtn.classList.add('hidden');
+            } else {
+                badge.innerText = gameState.endless ? 'ENDLESS RECORD' : 'BUSTED';
+                badge.className = 'inline-block px-4 py-1 rounded-full bg-rose-500/20 text-rose-300 text-xs font-black tracking-widest mb-3';
+                title.innerText = gameState.endless ? '♾️ 無限階層の果てに……' : '💀 敗北・破産……';
+                title.className = 'text-3xl sm:text-4xl font-black text-rose-500 neon-crimson mb-2';
+                desc.innerText = '次はさらに凶悪なダイス改造と遺物シナジーを組み上げよう！';
+                endlessBtn.classList.add('hidden');
+            }
+
+            document.getElementById('stat-pact').innerText = gameState.pact.name;
+            document.getElementById('stat-floor').innerText = gameState.endless ? `Floor ${gameState.floor} (無限)` : `Floor ${gameState.floor} / 20`;
+            document.getElementById('stat-max-dmg').innerText = formatNum(gameState.maxSingleDmg);
+            document.getElementById('stat-total-dmg').innerText = formatNum(gameState.totalDmgDealt);
+            document.getElementById('stat-artifacts').innerText = `${gameState.artifacts.length} / ${ARTIFACT_DB.length} 個`;
+            document.getElementById('stat-gold').innerText = `${gameState.gold} G`;
+        }
+
+        /* =====================================================================
+         * 9. UIレンダリング＆ユーティリティ関数
+         * ===================================================================== */
+        function renderAll() {
+            document.getElementById('ui-floor').innerText = gameState.floor;
+            document.getElementById('ui-max-floor').innerText = gameState.endless ? ' (∞)' : '/20';
+            document.getElementById('ui-hp').innerText = gameState.hp;
+            document.getElementById('ui-max-hp').innerText = gameState.maxHp;
+            document.getElementById('ui-shield').innerText = formatNum(gameState.shield);
+            document.getElementById('ui-gold').innerText = gameState.gold;
+            document.getElementById('ui-deck-count').innerText = gameState.drawPile.length;
+            document.getElementById('ui-discard-count').innerText = gameState.discardPile.length;
+            document.getElementById('ui-reshuffle-left').innerText = Math.max(0, MAX_RESHUFFLES_PER_TURN - gameState.reshufflesThisTurn);
+            document.getElementById('ui-dice-count').innerText = gameState.dice.length;
+
+            // エンドレス中の勝ち逃げボタン表示
+            const cashoutHeader = document.getElementById('btn-cashout-header');
+            if (gameState.endless) cashoutHeader.classList.remove('hidden');
+            else cashoutHeader.classList.add('hidden');
+
+            // 振り直しボタンの親切表記
+            const rerollBtn = document.getElementById('btn-reroll');
+            const clearBtn = document.getElementById('btn-clear-die');
+            const isDieSelected = gameState.selectedDieIndex !== null && gameState.dice[gameState.selectedDieIndex] && !gameState.dice[gameState.selectedDieIndex].used;
+            const hasFreeReroll = hasArtifact('dice_god_eye') && !gameState.freeRerollUsed;
+            rerollBtn.disabled = gameState.rerolls <= 0 && !hasFreeReroll;
+
+            const countLabel = hasFreeReroll ? `無料1+${gameState.rerolls}` : `${gameState.rerolls}`;
+            if (isDieSelected) {
+                rerollBtn.innerHTML = `🎯 選択ダイスのみ振り直し (${countLabel})`;
+                clearBtn.classList.remove('hidden');
+            } else {
+                rerollBtn.innerHTML = `🔄 全未使用ダイス振り直し (${countLabel})`;
+                clearBtn.classList.add('hidden');
+            }
+
+            // 遺物バー
+            document.getElementById('ui-art-count').innerText = gameState.artifacts.length;
+            document.getElementById('ui-art-total').innerText = ARTIFACT_DB.length;
+            const artList = document.getElementById('ui-artifacts-list');
+            if (gameState.artifacts.length === 0) {
+                artList.innerHTML = '<span class="text-xs text-gray-500">なし（勝利報酬で獲得しよう）</span>';
+            } else {
+                artList.innerHTML = gameState.artifacts.map((a, i) => `
+                    <div onclick="inspectArtifact(${i})" class="cursor-pointer shrink-0 px-2.5 py-1 rounded-xl bg-purple-950/80 border border-purple-400/50 text-xs font-bold text-purple-200 flex items-center gap-1 hover:bg-purple-900 transition" title="${a.desc}">
+                        <span>${a.icon}</span>
+                        <span>${a.name}</span>
+                    </div>
+                `).join('');
+            }
+
+            // 敵ステータス
+            const e = gameState.enemy;
+            if (e) {
+                document.getElementById('ui-enemy-tag').innerText = e.tag;
+                document.getElementById('ui-enemy-name').innerText = e.name;
+                document.getElementById('ui-enemy-hp').innerText = formatNum(e.hp);
+                document.getElementById('ui-enemy-max-hp').innerText = formatNum(e.maxHp);
+                const hpPct = Math.max(0, Math.min(100, (e.hp / e.maxHp) * 100));
+                document.getElementById('ui-enemy-hp-bar').style.width = `${hpPct}%`;
+
+                const shWrap = document.getElementById('ui-enemy-shield-wrap');
+                if (e.shield > 0) {
+                    shWrap.classList.remove('hidden');
+                    document.getElementById('ui-enemy-shield').innerText = formatNum(e.shield);
+                } else {
+                    shWrap.classList.add('hidden');
+                }
+
+                const intentEl = document.getElementById('ui-enemy-intent');
+                if (e.intent.type === 'attack') {
+                    intentEl.innerHTML = `⚔️ 次の行動: 攻撃 <span class="text-white font-black">${e.intent.val}</span>`;
+                } else if (e.intent.type === 'defend_attack') {
+                    intentEl.innerHTML = `🛡️⚔️ 次の行動: 防御${e.intent.shield} ＆ 攻撃 <span class="text-white font-black">${e.intent.val}</span>`;
+                } else {
+                    intentEl.innerHTML = `💀 次の行動: 強攻撃 <span class="text-yellow-300 font-black">${e.intent.val}</span>`;
+                }
+
+                document.getElementById('ui-enemy-svg').innerHTML = getEnemySVG(e.shape, e.color);
+            }
+
+            // 総合倍率モニター＆内訳タグ表示
+            const selectedDie = gameState.selectedDieIndex !== null ? gameState.dice[gameState.selectedDieIndex] : null;
+            const multDetail = getMultiplierDetails(selectedDie);
+            const liveMult = multDetail.total;
+            const multEl = document.getElementById('ui-turn-mult');
+            multEl.innerText = `×${formatMult(liveMult)}`;
+
+            const synInfo = document.getElementById('ui-synergy-info');
+            let statusBadges = multDetail.tags.map(t => `<span class="px-1.5 py-0.5 rounded bg-black/40 border border-white/10">${t}</span>`);
+            if (gameState.doubleCastNext) {
+                statusBadges.push('<span class="px-2 py-0.5 rounded bg-yellow-500/20 border border-yellow-400 text-yellow-300 font-black animate-pulse">✨ 次のカード2連続発動！</span>');
+            }
+            if (gameState.berserkerBonus > 0) {
+                statusBadges.push(`<span class="px-1.5 py-0.5 rounded bg-rose-950/60 border border-rose-500/40 text-rose-300">🎰 出目評価 +${gameState.berserkerBonus}</span>`);
+            }
+            synInfo.innerHTML = statusBadges.join('');
+
+            // ダイストレイ描画
+            const tray = document.getElementById('ui-dice-tray');
+            tray.innerHTML = '';
+            gameState.dice.forEach((d, idx) => {
+                const isSelected = gameState.selectedDieIndex === idx;
+                const isGold = d.current.type === 'mult' || d.current.val >= 6;
+                const displayVal = d.current.type === 'mult' ? `×${d.current.val}` : d.current.val;
+                const keyHint = idx < 9 ? `${idx + 1}` : '0';
+
+                const dieEl = document.createElement('button');
+                dieEl.id = `die-btn-${idx}`;
+                dieEl.className = `die-card rounded-2xl p-2 sm:p-3 flex flex-col items-center justify-between min-w-[58px] sm:w-24 ${isGold ? 'die-gold-face' : ''} ${isSelected ? 'die-selected' : ''} ${d.used ? 'die-used' : ''} ${d.rolling ? 'die-rolling' : ''}`;
+                dieEl.onclick = () => selectDie(idx);
+
+                const miniFaces = d.faces.map(f => {
+                    const txt = f.type === 'mult' ? `×${f.val}` : f.val;
+                    const cls = (f.type === 'mult' || f.val >= 6) ? 'text-yellow-400 font-black' : 'text-gray-400';
+                    return `<span class="${cls}">${txt}</span>`;
+                }).join('');
+
+                dieEl.innerHTML = `
+                    <div class="w-full flex items-center justify-between text-[10px] font-bold ${isSelected ? 'text-cyan-300' : 'text-gray-400'}">
+                        <span>${d.used ? '使用済' : (isSelected ? '選択中' : `#${idx + 1}`)}</span>
+                        <span class="hidden sm:inline px-1 rounded bg-black/50 text-gray-500 text-[9px]">${keyHint}</span>
+                    </div>
+                    <div class="text-2xl sm:text-4xl font-black my-1 ${d.current.type === 'mult' ? 'text-cyan-300 neon-cyan' : (d.current.val >= 6 ? 'text-yellow-300 neon-gold' : 'text-white')}">
+                        ${displayVal}
+                    </div>
+                    <div class="grid grid-cols-6 gap-0.5 text-[9px] w-full text-center bg-black/40 rounded px-1 py-0.5">
+                        ${miniFaces}
+                    </div>
+                `;
+                tray.appendChild(dieEl);
+                d.rolling = false;
+            });
+
+            // 手札描画
+            const handArea = document.getElementById('ui-hand-area');
+            handArea.innerHTML = '';
+            const previewVal = getEffectiveDieValue(selectedDie);
+
+            gameState.hand.forEach((handItem, hIdx) => {
+                const cardId = getHandCardId(handItem);
+                const isEthereal = isHandCardEthereal(handItem);
+                const card = CARD_DB[cardId];
+                const blockReason = getCardBlockReason(card);
+                const playable = !blockReason && (
+                    canPlayCardWithDie(card, selectedDie) ||
+                    (card.req !== 'none' && !selectedDie && gameState.dice.some(d => canPlayCardWithDie(card, d)))
+                );
+                const readyNow = !blockReason && canPlayCardWithDie(card, selectedDie);
+
+                let footerText = '🎲 ダイスを選択';
+                if (blockReason) {
+                    if (card.oncePerTurn && gameState.usedOncePerTurn[card.id]) footerText = '🚫 使用済 (1T1回)';
+                    else if (card.id === 'blood_die') footerText = '🩸 HP6以上で発動';
+                    else if (card.id === 'final_gamble') footerText = '💀 HP10以上で発動';
+                    else if (card.id === 'dice_cloner') footerText = '🎲 ダイス上限 (10個)';
+                } else if (!playable && card.req !== 'none') {
+                    footerText = `⚠️ 条件未達 (${card.reqLabel})`;
+                } else if (readyNow) {
+                    footerText = isEthereal ? '✨ 幻影発動（消滅）' : '✨ タップで即発動！';
+                } else if (card.req === 'none') {
+                    footerText = isEthereal ? '✨ 幻影発動（消滅）' : '✨ タップで発動';
+                }
+
+                const cardBtn = document.createElement('button');
+                cardBtn.className = `skill-card rounded-2xl p-3 text-left flex flex-col justify-between min-h-[130px] sm:min-h-[150px] ${card.color} ${readyNow ? 'card-ready' : ''} ${!playable ? 'card-disabled' : ''}`;
+                cardBtn.onclick = () => playCard(hIdx);
+
+                cardBtn.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between gap-1 mb-1.5 flex-wrap">
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-black ${card.badgeColor}">
+                                ${card.reqLabel}
+                            </span>
+                            ${isEthereal ? '<span class="px-1.5 py-0.5 rounded bg-purple-950 border border-purple-400 text-purple-200 text-[9px] font-black">✨幻影</span>' : ''}
+                        </div>
+                        <div class="font-black text-sm sm:text-base text-white leading-tight mb-1.5">${card.name}</div>
+                        <p class="text-[11px] sm:text-xs text-gray-300 leading-snug">
+                            ${card.desc(previewVal, liveMult, gameState)}
+                        </p>
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-white/10 text-[10px] font-bold ${(blockReason || (!playable && card.req !== 'none')) ? 'text-rose-400' : (readyNow ? 'text-cyan-300' : 'text-gray-400')}">
+                        ${footerText}
+                    </div>
+                `;
+                handArea.appendChild(cardBtn);
+            });
+
+            // ターン終了ボタンの状態表示（誤終了防止）
+            const endBtn = document.getElementById('btn-end-turn');
+            const actionHint = document.getElementById('ui-action-hint');
+            if (hasAnyPlayableAction()) {
+                endBtn.innerHTML = '⏳ ターン終了（まだ行動可能）';
+                endBtn.className = 'w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-800 to-purple-900 hover:from-rose-700 hover:to-purple-800 text-gray-200 font-black text-sm sm:text-base shadow-lg transition transform active:scale-95';
+                actionHint.innerText = isDieSelected ? '✨ 発動するカードをタップ！' : 'ダイスを選択するか、ダイス不要カードをタップ！';
+                actionHint.className = 'text-xs font-bold text-cyan-300 animate-pulse';
+            } else {
+                endBtn.innerHTML = '✅ 行動完了！ターン終了（敵の行動へ）';
+                endBtn.className = 'w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-black font-black text-sm sm:text-base shadow-lg shadow-cyan-500/30 transition transform active:scale-95';
+                actionHint.innerText = 'このターンで使えるカードはありません！ターン終了しよう';
+                actionHint.className = 'text-xs font-bold text-emerald-300';
+            }
+        }
+
+        function highlightValidDice(card) {
+            gameState.dice.forEach((d, idx) => {
+                if (canPlayCardWithDie(card, d)) {
+                    const el = document.getElementById(`die-btn-${idx}`);
+                    if (el) {
+                        el.classList.add('die-hint-pulse');
+                        setTimeout(() => el.classList.remove('die-hint-pulse'), 1600);
+                    }
+                }
+            });
+        }
+
+        function openDeckModal(tab = 'draw') {
+            document.getElementById('tab-count-draw').innerText = gameState.drawPile.length;
+            document.getElementById('tab-count-discard').innerText = gameState.discardPile.length;
+            document.getElementById('tab-count-all').innerText = `${gameState.deck.length}/${MAX_DECK_SIZE}`;
+
+            ['draw', 'discard', 'all'].forEach(t => {
+                const btn = document.getElementById(`tab-deck-${t}`);
+                if (t === tab) {
+                    btn.className = 'flex-1 py-2 rounded-xl text-xs sm:text-sm font-black border border-cyan-400 bg-cyan-950/80 text-cyan-200 transition';
+                } else {
+                    btn.className = 'flex-1 py-2 rounded-xl text-xs sm:text-sm font-black border border-gray-700 bg-[#11101d] text-gray-400 hover:text-white transition';
+                }
+            });
+
+            const descEl = document.getElementById('deck-modal-desc');
+            let targetList = [];
+            if (tab === 'draw') {
+                targetList = [...gameState.drawPile].sort();
+                descEl.innerText = '次にドローされる山札の残りカード一覧（順不同表示）';
+            } else if (tab === 'discard') {
+                targetList = [...gameState.discardPile];
+                descEl.innerText = '使用済みの捨て札一覧（山札が尽きると再補充されます）';
+            } else {
+                targetList = [...gameState.deck];
+                descEl.innerText = '現在の所持デッキ全体（手札・山札・捨て札の合計）';
+            }
+
+            const list = document.getElementById('deck-modal-list');
+            if (targetList.length === 0) {
+                list.innerHTML = '<div class="col-span-full text-center py-6 text-xs text-gray-500">カードがありません</div>';
+            } else {
+                list.innerHTML = targetList.map(cId => {
+                    const c = CARD_DB[cId];
+                    return `
+                        <div class="p-3 rounded-xl bg-[#11101d] border ${c.color}">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.badgeColor}">${c.reqLabel}</span>
+                            <div class="font-black text-white text-sm mt-1">${c.name}</div>
+                            <p class="text-xs text-gray-400 mt-1">${c.desc(6, 1, null)}</p>
+                        </div>
+                    `;
+                }).join('');
+            }
+            toggleModal('deck-modal', true);
+        }
+
+        function toggleModal(id, show) {
+            const el = document.getElementById(id);
+            if (show) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+
+        let toastTimer = null;
+        function showToast(msg) {
+            const box = document.getElementById('toast-box');
+            document.getElementById('toast-msg').innerText = msg;
+            box.classList.remove('opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => box.classList.add('opacity-0'), 2200);
+        }
+
+        function spawnFloatingText(text, x, y, color, fontSize) {
+            const el = document.createElement('div');
+            el.className = 'floating-text';
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+            el.style.color = color;
+            el.style.fontSize = `${fontSize}px`;
+            el.style.textShadow = `0 0 12px ${color}, 0 2px 4px #000`;
+            el.innerText = text;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1100);
+        }
+
+        function formatFaceBadge(f) {
+            if (f.type === 'mult') {
+                return `<span class="px-1.5 py-0.5 rounded bg-cyan-950 border border-cyan-400 text-cyan-300 text-xs font-black">×${f.val}</span>`;
+            }
+            const isHigh = f.val >= 6;
+            return `<span class="px-1.5 py-0.5 rounded ${isHigh ? 'bg-yellow-950 border border-yellow-400 text-yellow-300' : 'bg-gray-800 text-gray-300'} text-xs font-bold">${f.val}</span>`;
+        }
+
+        /* 日本語大数単位（無量大数 1e68 まで）＋ 指数表記対応フォーマット */
+        function formatNum(num) {
+            if (!Number.isFinite(num)) return '∞ (カンスト)';
+            if (num < 10000) return Math.floor(num).toLocaleString();
+
+            const units = [
+                { val: 1e68, label: '無量大数' },
+                { val: 1e64, label: '不可思議' },
+                { val: 1e60, label: '那由他' },
+                { val: 1e56, label: '阿僧祇' },
+                { val: 1e52, label: '恒河沙' },
+                { val: 1e48, label: '極' },
+                { val: 1e44, label: '載' },
+                { val: 1e40, label: '正' },
+                { val: 1e36, label: '澗' },
+                { val: 1e32, label: '溝' },
+                { val: 1e28, label: '穣' },
+                { val: 1e24, label: '𥝱' },
+                { val: 1e20, label: '垓' },
+                { val: 1e16, label: '京' },
+                { val: 1e12, label: '兆' },
+                { val: 1e8,  label: '億' },
+                { val: 1e4,  label: '万' }
+            ];
+
+            if (num >= 1e72) {
+                const expStr = num.toExponential(2);
+                const [mantissa, expPart] = expStr.split('e+');
+                return `${mantissa} × 10^${expPart}`;
+            }
+
+            for (const u of units) {
+                if (num >= u.val) {
+                    const scaled = num / u.val;
+                    const formatted = scaled >= 1000 ? Math.floor(scaled).toLocaleString() : scaled.toFixed(2).replace(/\.00$/, '');
+                    return `${formatted}${u.label}`;
+                }
+            }
+            return num.toExponential(2);
+        }
+
+        function formatMult(m) {
+            if (!Number.isFinite(m)) return '∞';
+            if (m >= 10000) return formatNum(m);
+            if (m >= 100) return Math.floor(m).toLocaleString();
+            return Number.isInteger(m) ? m : m.toFixed(1);
+        }
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function getEnemySVG(shape, color) {
+            const common = `width="100%" height="100%" viewBox="0 0 120 120"`;
+            if (shape === 'final' || shape === 'boss1') {
+                return `<svg ${common}>
+                    <defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+                    <polygon points="60,8 108,35 108,85 60,112 12,85 12,35" fill="none" stroke="${color}" stroke-width="3" filter="url(#glow)"/>
+                    <circle cx="60" cy="60" r="30" fill="${color}" fill-opacity="0.2" stroke="${color}" stroke-width="2.5"/>
+                    <polygon points="60,22 72,50 100,60 72,70 60,98 48,70 20,60 48,50" fill="${color}" filter="url(#glow)"/>
+                    <circle cx="60" cy="60" r="9" fill="#0b0b12"/>
+                </svg>`;
+            }
+            return `<svg ${common}>
+                <defs><filter id="glow2"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+                <rect x="22" y="22" width="76" height="76" rx="18" transform="rotate(45 60 60)" fill="${color}" fill-opacity="0.15" stroke="${color}" stroke-width="3" filter="url(#glow2)"/>
+                <circle cx="46" cy="54" r="6" fill="${color}"/>
+                <circle cx="74" cy="54" r="6" fill="${color}"/>
+                <path d="M 42 76 Q 60 64 78 76" fill="none" stroke="${color}" stroke-width="3.5" stroke-linecap="round"/>
+            </svg>`;
+        }
+
+        // PC用キーボードショートカット
+        document.addEventListener('keydown', (e) => {
+            if (e.repeat) return;
+            const gameVisible = !document.getElementById('game-screen').classList.contains('hidden');
+            const anyModalOpen = ['reward-modal', 'result-screen', 'rules-modal', 'deck-modal']
+                .some(id => !document.getElementById(id).classList.contains('hidden'));
+            if (!gameVisible || anyModalOpen || gameState.isTransitioning) return;
+
+            if (e.key >= '1' && e.key <= '9') {
+                const idx = parseInt(e.key, 10) - 1;
+                if (gameState.dice && gameState.dice[idx]) selectDie(idx);
+            } else if (e.key === '0') {
+                if (gameState.dice && gameState.dice[9]) selectDie(9);
+            } else if (e.key === 'r' || e.key === 'R') {
+                rerollDice();
+            } else if (e.key === 'Escape') {
+                clearSelectedDie();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                endPlayerTurn();
+            }
+        });
+
+        window.onload = () => {
+            renderTitleScreen();
+        };
+    </script>
+</body>
+</html>
